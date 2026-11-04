@@ -1,10 +1,10 @@
 # Audit report — OAuth Compass CLI
 
-Date: 2026-11-04. Package: `@hardmachinelabs/oauth-compass@0.1.0` (renamed from `oauth-compass-cli`), unpublished. Line numbers refer to the current tree.
+Date: 2026-11-04. Package: `@hardmachinelabs/oauth-compass@0.1.0` (renamed from `oauth-compass-cli`), published on 2026-11-04 as an early release. Line numbers refer to the current tree.
 
 ## Verdict
 
-**Code is ready for smoke testing; not yet recommended for npm.** All BLOCKER and High findings and all code-related Medium findings are fixed with regression tests, and CI passed on Linux, macOS and Windows. What remains is manual testing on real provider consoles, plus the items below. The findings below are open; fixed ones are listed under "Resolved during the audit".
+**Published as an early release; real sign-ins still to confirm.** All BLOCKER and High findings and all code-related Medium findings are fixed with regression tests, and CI passed on Linux, macOS and Windows. What remains is manual testing on real provider consoles, plus the items below. The findings below are open; fixed ones are listed under "Resolved during the audit".
 
 - Exposed secrets: none found (pattern scan of the tree, plus CLI output checks with synthetic secrets).
 - Overwritten credentials: none. `wx` writes refused every overwrite and symlink case tested.

@@ -4,6 +4,7 @@
 
 # OAuth Compass CLI
 
+[![npm](https://img.shields.io/npm/v/@hardmachinelabs/oauth-compass)](https://www.npmjs.com/package/@hardmachinelabs/oauth-compass)
 [![Tests](https://img.shields.io/github/actions/workflow/status/jordachmakaya/oauth-compass/ci.yml?branch=main&label=tests)](https://github.com/jordachmakaya/oauth-compass/actions/workflows/ci.yml)
 ![Coverage gate](https://img.shields.io/badge/coverage%20gate-%E2%89%A590%25%20lines-brightgreen)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
@@ -288,6 +289,8 @@ These scripts run through [Turborepo](https://turborepo.com). Build and typechec
 E2E tests run the compiled CLI for every provider and assert that synthetic secrets are not printed. A separate test installs the packed tarball like a consumer and runs the `oauth-compass` binary. No external accounts, browsers or provider secrets are required. CI covers Node 22 and 24 on Ubuntu, macOS and Windows.
 
 ### Releasing
+
+New versions may stop in npm's staged release step. The package page then shows a `0.0.0-stage` placeholder until a maintainer approves the release with 2FA.
 
 Maintainers publish with pnpm, never with `npm publish`: only pnpm replaces the `catalog:` versions and removes `packageManager` from the published `package.json`. `publishConfig` already makes this scoped package public.
 
