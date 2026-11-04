@@ -2,7 +2,7 @@
 
 For step-by-step instructions, see the [Google](google.md), [GitHub](github.md), [LinkedIn](linkedin.md) and [Amazon Cognito](cognito.md) guides.
 
-Secrets must be obtained from each provider's official developer console. No browser automation, scraping, or third-party API impersonation.
+Secrets must be obtained from each provider's official developer console. Input files are limited to 1 MiB. No browser automation, scraping, or third-party API impersonation.
 
 ## Google (downloaded file)
 

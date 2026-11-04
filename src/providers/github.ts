@@ -25,7 +25,7 @@ export const github: OAuthProvider = {
     "Open Settings > Developer settings > OAuth Apps > New OAuth App.",
     "Register the public homepage URL and the displayed callback URL.",
     "Generate a client secret in the OAuth App settings.",
-    "Save credentials in a LOCAL JSON file matching docs/credentials-format.md.",
+    "Save credentials in a LOCAL JSON file. Format: https://github.com/jordachmakaya/oauth-compass/blob/main/docs/github.md",
     "GitHub Apps may be a better choice for repository integrations; this MVP targets OAuth Apps.",
   ],
   parseCredentials(input: unknown, expectedRedirectUri?: string) {

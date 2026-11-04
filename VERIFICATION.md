@@ -5,7 +5,7 @@ Full findings, reproduction steps and sources are in [AUDIT_REPORT.md](AUDIT_REP
 ## Executed
 
 - `pnpm install --frozen-lockfile`, typecheck, unit, integration, E2E, coverage, `pack:check` and `pnpm audit` — **PASS** on Windows (Node 24.16.0) and in clean Linux containers (`node:22.23.4-slim`, `node:24.16.0-slim`), with `pnpm-lock.yaml` unchanged.
-- Tests: 52/52 on Linux; on Windows 1 symlink test is skipped because creating symlinks needs extra privileges.
+- Tests: 59/59 on Linux; on Windows 1 symlink test is skipped because creating symlinks needs extra privileges.
 - Every command in the four provider guides, run verbatim against the packed tarball on Linux.
 - Real tarball install on Windows and Linux via npm and pnpm, including `pnpm dlx` and `pnpm add -g` on Linux — **PASS** after the F-01 fix. Before it, the binary did nothing on Linux and exited 0.
 
@@ -17,6 +17,7 @@ Full findings, reproduction steps and sources are in [AUDIT_REPORT.md](AUDIT_REP
 ## Release blockers
 
 1. Run manual provider smoke tests with disposable OAuth apps on all four providers.
-2. Add provenance and publishing controls.
+2. Enable npm 2FA and add provenance and publishing controls.
+3. Publish with `pnpm publish`, never `npm publish`.
 
 No claim is made that remote OAuth apps can be created automatically. Nothing has been published to npm.

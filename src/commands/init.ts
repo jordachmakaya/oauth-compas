@@ -26,7 +26,7 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
-import { createChecklist } from "./guide.js";
+import { cliCommand, createChecklist } from "./guide.js";
 import { doctor } from "./doctor.js";
 import { importCredentials } from "./import-credentials.js";
 import { UserError } from "../core/errors.js";
@@ -109,7 +109,7 @@ export async function runInit(io: Prompter, root: string): Promise<number> {
   for (;;) {
     const answer = await io.ask("Path to your credentials file, not the secret (leave empty to stop here): ");
     if (!answer) {
-      io.write("Stopped. Nothing was saved. Run oauth-compass init again when your file is ready.\n");
+      io.write(`Stopped. Nothing was saved. Run ${cliCommand} again when your file is ready.\n`);
       return 0;
     }
     try {

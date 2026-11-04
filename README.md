@@ -39,7 +39,7 @@
 
 - Walk you through setup with a single interactive command.
 - Print a setup checklist for each provider, with your own URLs.
-- Validate the credentials file you provide: format, HTTPS rules and redirect URL match.
+- Validate the credentials file you provide (up to 1 MiB): format, HTTPS rules and redirect URL match.
 - Write a JSON file and a `.env` file to `.oauth-init/`, with owner-only permissions on macOS and Linux.
 - Add `.oauth-init/` to `.gitignore`, and refuse to overwrite existing credentials.
 - Check the local result with `doctor`.
@@ -86,7 +86,7 @@ Node.js 22 and 24 are tested on all three.
 You only need Node.js 22+ and a provider account. In your project's main folder, run:
 
 ```bash
-npx oauth-compass
+npx @hardmachinelabs/oauth-compass
 ```
 
 The assistant asks for your provider and URLs, shows the setup checklist, then imports and checks your credentials file. It never asks for your secret. If your app isn't ready yet, leave the file path empty and come back later.
@@ -98,7 +98,7 @@ Prefer separate commands, for example in a script? These steps do the same thing
 ### Step 1: Check the CLI runs
 
 ```bash
-npx oauth-compass providers
+npx @hardmachinelabs/oauth-compass providers
 ```
 
 Expected result:
@@ -109,14 +109,14 @@ github
 linkedin
 ```
 
-Using pnpm? Replace `npx` with `pnpm dlx`. For regular use, run `npm install -g oauth-compass` once, then drop the `npx`.
+Using pnpm? Replace `npx` with `pnpm dlx`. For regular use, run `npm install -g @hardmachinelabs/oauth-compass` once, then use the shorter `oauth-compass` command.
 
 ### Step 2: Get your setup checklist
 
 Pass your app's URL and its OAuth callback URL.
 
 ```bash
-npx oauth-compass guide github --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/github
+npx @hardmachinelabs/oauth-compass guide github --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/github
 ```
 
 Expected result:
@@ -132,11 +132,11 @@ Suggested scopes: read:user user:email
 1. Open Settings > Developer settings > OAuth Apps > New OAuth App.
 2. Register the public homepage URL and the displayed callback URL.
 3. Generate a client secret in the OAuth App settings.
-4. Save credentials in a LOCAL JSON file matching docs/credentials-format.md.
+4. Save credentials in a LOCAL JSON file. Format: https://github.com/jordachmakaya/oauth-compass/blob/main/docs/github.md
 5. GitHub Apps may be a better choice for repository integrations; this MVP targets OAuth Apps.
 
 Then run:
-  oauth-compass import github --file <local-credentials.json> --redirect http://localhost:3000/api/auth/callback/github
+  npx @hardmachinelabs/oauth-compass import github --file <local-credentials.json> --redirect http://localhost:3000/api/auth/callback/github
 
 Note: the CLI cannot create third-party OAuth apps or disclose client secrets automatically.
 ```
@@ -159,7 +159,7 @@ Details are in the [provider guides](#providers) and [credential formats](docs/c
 Run this from your project's root folder.
 
 ```bash
-npx oauth-compass import github --file "$HOME/github-oauth.json" --redirect http://localhost:3000/api/auth/callback/github
+npx @hardmachinelabs/oauth-compass import github --file "$HOME/github-oauth.json" --redirect http://localhost:3000/api/auth/callback/github
 ```
 
 Expected result:
@@ -176,7 +176,7 @@ The CLI also adds `.oauth-init/` to `.gitignore`. It never overwrites existing c
 ### Step 5: Check the result
 
 ```bash
-npx oauth-compass doctor github
+npx @hardmachinelabs/oauth-compass doctor github
 ```
 
 Expected result:
@@ -187,7 +187,7 @@ PASS /your/project/.oauth-init/github.credentials.json exists
 PASS /your/project/.oauth-init/github.env exists
 ```
 
-`doctor` checks local files only, so it cannot prove that the provider accepts your credentials. On Windows, an extra `INFO` line reminds you that file permissions are not checked.
+`doctor` also checks that the `.env` matches the JSON file, without printing either. It looks at local files only, so it cannot prove that the provider accepts your credentials. On Windows, an extra `INFO` line reminds you that file permissions are not checked.
 
 ### Step 6: Use the values in your app
 
@@ -203,6 +203,8 @@ Use these only on your application's **trusted server**, never in client-side co
 
 ## Commands
 
+The table uses the short `oauth-compass` name. If you did not install it globally, replace it with `npx @hardmachinelabs/oauth-compass`.
+
 | Command | What it does | Expected result | Exit code |
 | --- | --- | --- | --- |
 | `oauth-compass` | Starts the interactive setup in a terminal, and prints help otherwise | Questions, then checklist, import and checks | `0` when complete or stopped, `1` on failure |
@@ -210,7 +212,7 @@ Use these only on your application's **trusted server**, never in client-side co
 | `oauth-compass providers` | Lists supported providers | One provider per line | `0` |
 | `oauth-compass guide <provider> --origin URL --redirect URL` | Prints the manual setup checklist | Console link, URLs, scopes and numbered steps | `0` |
 | `oauth-compass import <provider> --file PATH [--redirect URL] [--out DIRECTORY]` | Validates a local JSON file and writes the credential files | Paths of the two created files | `0` |
-| `oauth-compass doctor <provider> [--out DIRECTORY]` | Checks `.gitignore`, the files and their permissions | One `PASS` or `FAIL` line per check | `0` if all pass, `1` otherwise |
+| `oauth-compass doctor <provider> [--out DIRECTORY]` | Checks `.gitignore`, the files, their permissions, and that they match each other | One `PASS` or `FAIL` line per check | `0` if all pass, `1` otherwise |
 | `oauth-compass skill install [--out DIRECTORY]` | Installs the AI agent skill | Path of the created `SKILL.md` | `0` |
 | `oauth-compass --help` | Shows usage | Command list | `0` |
 
@@ -236,7 +238,7 @@ OAuth Compass includes a skill that teaches agents such as Claude Code to run th
 The skill ships inside the package, but nothing is written until you ask. Run this from your project's root folder:
 
 ```bash
-npx oauth-compass skill install
+npx @hardmachinelabs/oauth-compass skill install
 ```
 
 Expected result:
@@ -284,6 +286,17 @@ pnpm run pack:check
 These scripts run through [Turborepo](https://turborepo.com). Build and typecheck results are cached; tests and coverage are never cached, so a pass always means the tests ran. `pnpm run coverage` enforces the thresholds in `.c8rc.json` and writes `coverage/lcov.info` and an HTML report. Turborepo collects anonymous telemetry by default: run `pnpm exec turbo telemetry disable` to opt out locally (CI already disables it). The published CLI itself has no telemetry and zero runtime dependencies.
 
 E2E tests run the compiled CLI for every provider and assert that synthetic secrets are not printed. A separate test installs the packed tarball like a consumer and runs the `oauth-compass` binary. No external accounts, browsers or provider secrets are required. CI covers Node 22 and 24 on Ubuntu, macOS and Windows.
+
+### Releasing
+
+Maintainers publish with pnpm, never with `npm publish`: only pnpm replaces the `catalog:` versions and removes `packageManager` from the published `package.json`. `publishConfig` already makes this scoped package public.
+
+```bash
+pnpm publish --dry-run
+pnpm publish
+```
+
+Before a release, update [CHANGELOG.md](CHANGELOG.md), confirm that CI is green, and run a real sign-in with a disposable app on each provider.
 
 ## Architecture and security
 

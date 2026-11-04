@@ -4,7 +4,7 @@ This guide takes you from nothing to working Amazon Cognito credentials in your 
 
 **What Cognito is:** AWS has no "Sign in with AWS" button for your users. Cognito is a user directory that you own: your users create accounts in your user pool and sign in through its hosted pages, over standard OAuth 2.0 and OpenID Connect.
 
-**In a hurry?** Run `npx oauth-compass` and answer the questions. This guide explains the same steps in detail.
+**In a hurry?** Run `npx @hardmachinelabs/oauth-compass` and answer the questions. This guide explains the same steps in detail.
 
 ## Before you start
 
@@ -34,7 +34,7 @@ Cognito allows `http` only for `localhost`, so `http://127.0.0.1` is refused. Ev
 ## Step 1: Get your checklist
 
 ```bash
-npx oauth-compass guide cognito --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/cognito
+npx @hardmachinelabs/oauth-compass guide cognito --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/cognito
 ```
 
 You should see `Amazon Cognito OAuth setup`, followed by your two addresses and a numbered list.
@@ -69,7 +69,7 @@ Create a text file named `cognito-oauth.json` in your **home folder**, not in yo
 ## Step 4: Import the credentials
 
 ```bash
-npx oauth-compass import cognito --file "$HOME/cognito-oauth.json" --redirect http://localhost:3000/api/auth/callback/cognito
+npx @hardmachinelabs/oauth-compass import cognito --file "$HOME/cognito-oauth.json" --redirect http://localhost:3000/api/auth/callback/cognito
 ```
 
 You should see `Credentials stored locally:` followed by two file paths. Your secrets are now in the `.oauth-init/` folder, which was added to `.gitignore`.
@@ -79,7 +79,7 @@ This command works in PowerShell and in macOS and Linux terminals. In the older 
 ## Step 5: Check everything
 
 ```bash
-npx oauth-compass doctor cognito
+npx @hardmachinelabs/oauth-compass doctor cognito
 ```
 
 You should see three lines starting with `PASS`. On Windows, a fourth `INFO` line reminds you that file permissions are not checked.
@@ -108,7 +108,7 @@ Never put the secret in browser code or commit it. OAuth Compass does not add a 
 | `Expected redirect URI is not present` | `--redirect` differs from the file, even by a final `/` | Make both exactly identical. |
 | `Amazon Cognito allows HTTP only` | You used `http` with an address other than `localhost` | Use `http://localhost` or an `https://` address. |
 | `Refusing to overwrite` | Credentials already exist | Delete the two `cognito.*` files in `.oauth-init/` if you want to replace them, then import again. |
-| `FAIL` in `doctor` | That check failed | Read the line: it names the file or `.gitignore` problem. |
+| `FAIL` in `doctor` | That check failed. `out of sync` means the `.env` no longer matches the JSON file. | Read the line: it names the file or `.gitignore` problem. |
 
 ## Good to know
 

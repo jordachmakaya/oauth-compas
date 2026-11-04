@@ -1,5 +1,5 @@
 {
-  "name": "oauth-compass",
+  "name": "@hardmachinelabs/oauth-compass",
   "version": "0.1.0",
   "description": "Local-first guided OAuth credential setup for Google, GitHub and LinkedIn",
   "author": "Jordach M. Makaya (https://github.com/jordachmakaya)",
@@ -16,10 +16,14 @@
   "bin": {
     "oauth-compass": "./dist/src/cli.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist/src",
     "README.md",
     "LICENSE",
+    "CHANGELOG.md",
     "SECURITY.md",
     "CLAUDE.md",
     "docs",

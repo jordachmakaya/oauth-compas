@@ -10,6 +10,7 @@
  * outputs: [providerIds, ProviderId, OAuthCredentials, OAuthProvider, SetupInput]
  * relations:
  *   - used_by: src/core/storage.ts
+ *   - used_by: src/commands/doctor.ts
  *   - used_by: src/core/validation.ts
  *   - used_by: src/providers/index.ts
  *   - used_by: src/providers/google.ts

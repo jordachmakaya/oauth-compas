@@ -2,7 +2,7 @@
 
 This guide takes you from nothing to working LinkedIn OAuth credentials in your project. It takes about 15 minutes. You create the app yourself in LinkedIn's Developer Portal; OAuth Compass checks and stores the result.
 
-**In a hurry?** Run `npx oauth-compass` and answer the questions. This guide explains the same steps in detail.
+**In a hurry?** Run `npx @hardmachinelabs/oauth-compass` and answer the questions. This guide explains the same steps in detail.
 
 ## Before you start
 
@@ -33,7 +33,7 @@ LinkedIn's documentation describes redirect URLs over HTTPS. We have not confirm
 ## Step 1: Get your checklist
 
 ```bash
-npx oauth-compass guide linkedin --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/linkedin
+npx @hardmachinelabs/oauth-compass guide linkedin --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/linkedin
 ```
 
 You should see `LinkedIn OAuth setup`, followed by your two addresses and a numbered list.
@@ -58,7 +58,7 @@ Create a text file named `linkedin-oauth.json` in your **home folder**, not in y
 ## Step 4: Import the credentials
 
 ```bash
-npx oauth-compass import linkedin --file "$HOME/linkedin-oauth.json" --redirect http://localhost:3000/api/auth/callback/linkedin
+npx @hardmachinelabs/oauth-compass import linkedin --file "$HOME/linkedin-oauth.json" --redirect http://localhost:3000/api/auth/callback/linkedin
 ```
 
 You should see `Credentials stored locally:` followed by two file paths. Your secrets are now in the `.oauth-init/` folder, which was added to `.gitignore`.
@@ -68,7 +68,7 @@ This command works in PowerShell and in macOS and Linux terminals. In the older 
 ## Step 5: Check everything
 
 ```bash
-npx oauth-compass doctor linkedin
+npx @hardmachinelabs/oauth-compass doctor linkedin
 ```
 
 You should see three lines starting with `PASS`. On Windows, a fourth `INFO` line reminds you that file permissions are not checked.
@@ -96,7 +96,7 @@ Never put the secret in browser code or commit it. OAuth Compass does not add a 
 | `Non-local redirect URL must use HTTPS` | Only `localhost`, `127.0.0.1` and `[::1]` may use `http` | Use an `https://` address. |
 | `Redirect_uri doesn't match` in the browser | Your app sent a different address from the Auth tab | Make the Auth tab, the `.env` value and your app identical. |
 | `Invalid scope` in the browser | The app does not have that scope | Confirm the product on the **Products** tab, then check the **Auth** tab. |
-| `FAIL` in `doctor` | That check failed | Read the line: it names the file or `.gitignore` problem. |
+| `FAIL` in `doctor` | That check failed. `out of sync` means the `.env` no longer matches the JSON file. | Read the line: it names the file or `.gitignore` problem. |
 
 ## Good to know
 

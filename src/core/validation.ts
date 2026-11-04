@@ -31,7 +31,7 @@ export function record(value: unknown, name: string): Record<string, unknown> {
 }
 export function nonEmptyString(value: unknown, name: string): string {
   if (typeof value !== "string" || value.trim().length === 0 || value.length > 8192) {
-    throw new UserError(`${name} must be a non-empty string`);
+    throw new UserError(`${name} must be a non-empty string of at most 8192 characters`);
   }
   return value;
 }

@@ -2,7 +2,7 @@
 
 This guide takes you from nothing to working GitHub OAuth credentials in your project. It takes about 10 minutes. You create the app yourself on github.com; OAuth Compass checks and stores the result.
 
-**In a hurry?** Run `npx oauth-compass` and answer the questions. This guide explains the same steps in detail.
+**In a hurry?** Run `npx @hardmachinelabs/oauth-compass` and answer the questions. This guide explains the same steps in detail.
 
 ## Before you start
 
@@ -30,7 +30,7 @@ This guide takes you from nothing to working GitHub OAuth credentials in your pr
 ## Step 1: Get your checklist
 
 ```bash
-npx oauth-compass guide github --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/github
+npx @hardmachinelabs/oauth-compass guide github --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/github
 ```
 
 You should see `GitHub OAuth setup`, followed by your two addresses and a numbered list.
@@ -59,7 +59,7 @@ Create a text file named `github-oauth.json` in your **home folder**, not in you
 ## Step 4: Import the credentials
 
 ```bash
-npx oauth-compass import github --file "$HOME/github-oauth.json" --redirect http://localhost:3000/api/auth/callback/github
+npx @hardmachinelabs/oauth-compass import github --file "$HOME/github-oauth.json" --redirect http://localhost:3000/api/auth/callback/github
 ```
 
 You should see `Credentials stored locally:` followed by two file paths. Your secrets are now in the `.oauth-init/` folder, which was added to `.gitignore`.
@@ -69,7 +69,7 @@ This command works in PowerShell and in macOS and Linux terminals. In the older 
 ## Step 5: Check everything
 
 ```bash
-npx oauth-compass doctor github
+npx @hardmachinelabs/oauth-compass doctor github
 ```
 
 You should see three lines starting with `PASS`. On Windows, a fourth `INFO` line reminds you that file permissions are not checked.
@@ -96,7 +96,7 @@ Never put the secret in browser code or commit it. OAuth Compass does not add a 
 | `Refusing to overwrite` | Credentials already exist | Delete the two `github.*` files in `.oauth-init/` if you want to replace them, then import again. |
 | `Non-local redirect URL must use HTTPS` | Only `localhost`, `127.0.0.1` and `[::1]` may use `http` | Use an `https://` address. |
 | `redirect_uri_mismatch` in the browser, or the sign-in fails on return | The app's callback differs from the one your app sends | Make the GitHub setting, the `.env` value and your app identical. |
-| `FAIL` in `doctor` | That check failed | Read the line: it names the file or `.gitignore` problem. |
+| `FAIL` in `doctor` | That check failed. `out of sync` means the `.env` no longer matches the JSON file. | Read the line: it names the file or `.gitignore` problem. |
 
 If your secret leaks, generate a new one on GitHub, update your app, then delete the old one.
 

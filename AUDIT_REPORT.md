@@ -1,6 +1,6 @@
 # Audit report — OAuth Compass CLI
 
-Date: 2026-11-04. Package: `oauth-compass@0.1.0` (renamed from `oauth-compass-cli`), unpublished. Line numbers refer to the current tree.
+Date: 2026-11-04. Package: `@hardmachinelabs/oauth-compass@0.1.0` (renamed from `oauth-compass-cli`), unpublished. Line numbers refer to the current tree.
 
 ## Verdict
 
@@ -15,7 +15,7 @@ Date: 2026-11-04. Package: `oauth-compass@0.1.0` (renamed from `oauth-compass-cl
 
 | Claim (source) | Result | Evidence |
 | --- | --- | --- |
-| `npx oauth-compass` / installed `oauth-compass` works (README) | True on Linux and Windows after the F-01 fix; macOS covered by the packed-install test once CI runs it | `tests/e2e/packed-install.test.ts`, Docker |
+| `npx @hardmachinelabs/oauth-compass` / installed `oauth-compass` works (README) | True on Linux and Windows after the F-01 fix; macOS covered by the packed-install test once CI runs it | `tests/e2e/packed-install.test.ts`, Docker |
 | guide → import → doctor workflow (README) | True when run as `node dist/src/cli.js` | E2E, Docker, WSL |
 | Refuses overwrite (README, architecture) | True | Linux sections 5, 6; integration test |
 | Adds `.oauth-init/` to `.gitignore` before writing (architecture) | True, including on an import later refused for overwrite | F-12 |
@@ -43,7 +43,6 @@ A 71 KB installer for OpenAI Codex, referenced by nothing in the project. It has
 - **F-07** `src/core/storage.ts:44` — A pre-existing `.oauth-init` at 0755 is accepted and `doctor` passes. Files stay 0600, so only file names are exposed. Fix: tighten or refuse it.
 - **F-12** `src/commands/import-credentials.ts:32` — `.gitignore` is changed before the overwrite check, so a refused import still modifies it. The duplicate entries part is fixed.
 - **F-13** `src/core/storage.ts:66` — Two sequential writes, not atomic. A write failure was rolled back correctly in testing, but a crash between writes would leave one file and block re-import (by inspection, not reproduced). Fix: temp file plus rename or link.
-- **F-14** `src/commands/import-credentials.ts:29`, `src/core/validation.ts:31` — No input size limit (64 MiB accepted). The oversize error says "non-empty". Control characters and surrounding spaces are now rejected.
 - **F-15** `src/commands/import-credentials.ts:29` — A UTF-8 BOM makes import fail with a syntax message. Some Windows tools write one, and GitHub/LinkedIn files are hand-made.
 - **F-16** `src/main.ts:71`, `src/providers/index.ts:31` — Raw user input is echoed: a secret mistyped as a provider appears on stderr, and ANSI escapes are not stripped. There is no `--version`, and `--out` pointing at a missing path or a file blames `.gitignore`.
 - **F-17** `src/providers/google.ts:39` — `import google` accepts an undocumented flat `{provider:"google",...}` shape, needed only by `doctor`. Fix: keep it out of the import path.
@@ -69,7 +68,11 @@ A 71 KB installer for OpenAI Codex, referenced by nothing in the project. It has
 | **F-09 (Medium)** Google step omitted the one-time secret | Step text and guide updated |
 | **F-10 (Medium)** provider map in core storage | Removed; the `.env` prefix derives from the provider ID |
 | **F-11 (Medium)** `doctor` false PASS | Negated `.gitignore` entries and broken `.env` files now fail; one line per file; Windows prints an `INFO` line |
-| Quick start showed contributor commands (`node dist/src/cli.js`) | README rewritten around `npx oauth-compass` with step-by-step usage |
+| **F-14 (Low)** no input size limit | Files over 1 MiB and non-regular paths refused before reading; oversize field message corrected |
+| **F-22 (Medium)** `doctor` only checked that `.env` keys existed, reported by an external review | `doctor` compares the `.env` with the stored JSON without printing values; extra variables and any stored redirect URI stay valid |
+| **F-23 (Low)** CLI steps pointed to `docs/` paths that do not exist in a consumer's project | Steps now give public URLs |
+| **F-24 (Low)** `guide` told `npx` users to run an `oauth-compass` command they do not have | `guide` and the wizard now print the full `npx` command |
+| Quick start showed contributor commands (`node dist/src/cli.js`) | README rewritten around `npx @hardmachinelabs/oauth-compass` with step-by-step usage |
 
 Also added at the owner's request: Amazon Cognito (fourth provider), the interactive `init` wizard, OS and provider compatibility tables, provider guides, the `skill install` command and bundled agent skill (no `postinstall` hook, by design), Turborepo (tests never cached, per rule 8), c8 coverage, Dependabot, `@filemeta` headers. Each fix above was first shown to fail with its regression test on the unfixed code (6 failures) before the change. Provider rules behind F-03 and F-04 are the Google pages listed below, checked on 2026-11-04.
 
@@ -84,7 +87,7 @@ Also added at the owner's request: Amazon Cognito (fourth provider), the interac
 | Real tarball install and behaviour (F-01, F-07, symlinks) | Docker and WSL, Node 22.23.4 and 24.x | F-01 and F-07 reproduced; symlink refusals pass |
 | Real tarball install | Windows via npm and pnpm | Works |
 | Fixed tarball: `npm i -g`, local `.bin`, `npx`, `pnpm exec`, `pnpm dlx`, `pnpm add -g` | Docker, Node 22.23.4 and 24.16.0 | Works |
-| All gates on the final code (52 tests) | Windows; Docker Node 22.23.4 and 24.16.0 | Pass; 1 symlink test is skipped on Windows |
+| All gates on the final code (59 tests) | Windows; Docker Node 22.23.4 and 24.16.0 | Pass; 1 symlink test is skipped on Windows |
 | Provider guides: every command run verbatim against the tarball | Docker, Node 22.23.4 and 24.16.0 | Pass |
 
 Symlink cases gave these results on Linux: live and dangling output links, symlinked `.oauth-init` and symlinked `.gitignore` were all refused with no write through the link. A dangling link gives only "Unexpected error". Non-root write refusal also held. Windows symlink cases could not run (`EPERM`). Tarballs used for F-01 predate the `@filemeta` headers and Turborepo, neither of which touches the guard logic.
@@ -115,11 +118,12 @@ Symlink cases gave these results on Linux: live and dangling output links, symli
 - macOS is covered by CI only, including the packed-install test.
 - Cognito guide labels come from AWS documentation and were not checked in a live console. Login with Amazon was not added: its page does not show a local development option.
 - No live provider console or real OAuth app was used, so provider acceptance of specific URLs is inferred from docs. Disposable-app smoke tests are still needed before release.
-- `oauth-compass` returned 404 on the npm registry on 2026-11-04. That suggests the name is free but reserves nothing.
+- `@hardmachinelabs/oauth-compass` returned 404 on the npm registry on 2026-11-04, and the owner's other packages use this scope. The first publish still needs an npm login with rights on the scope.
 - `.gitignore` cannot protect files that are already tracked, and credential files are not encrypted (documented in SECURITY.md).
 - No npm provenance, code scanning or branch protection is configured yet.
 
 ## Recommended order before publishing
 
-1. Manual smoke tests with disposable apps on all four providers.
-2. Low findings that matter to you, then provenance and release controls.
+1. Manual smoke tests with disposable apps on all four providers. Mark any untested provider as experimental in the README.
+2. Enable npm 2FA, then add provenance and release controls.
+3. Publish with `pnpm publish`, not `npm publish`: tested on 2026-11-04, `npm pack` leaves `catalog:` versions and `packageManager` in the published manifest.

@@ -2,7 +2,7 @@
 
 This guide takes you from nothing to working Google OAuth credentials in your project. It takes about 15 minutes. You create the client yourself in Google's console; OAuth Compass checks and stores the result.
 
-**In a hurry?** Run `npx oauth-compass` and answer the questions. This guide explains the same steps in detail.
+**In a hurry?** Run `npx @hardmachinelabs/oauth-compass` and answer the questions. This guide explains the same steps in detail.
 
 ## Before you start
 
@@ -30,7 +30,7 @@ This guide takes you from nothing to working Google OAuth credentials in your pr
 ## Step 1: Get your checklist
 
 ```bash
-npx oauth-compass guide google --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/google
+npx @hardmachinelabs/oauth-compass guide google --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/google
 ```
 
 You should see `Google OAuth setup`, followed by your two addresses and a numbered list.
@@ -63,7 +63,7 @@ It looks like this, with your real values. Do not edit it:
 ## Step 4: Import the credentials
 
 ```bash
-npx oauth-compass import google --file "$HOME/Downloads/client_secret.json" --redirect http://localhost:3000/api/auth/callback/google
+npx @hardmachinelabs/oauth-compass import google --file "$HOME/Downloads/client_secret.json" --redirect http://localhost:3000/api/auth/callback/google
 ```
 
 You should see `Credentials stored locally:` followed by two file paths. Your secrets are now in the `.oauth-init/` folder, which was added to `.gitignore`.
@@ -73,7 +73,7 @@ This command works in PowerShell and in macOS and Linux terminals. In the older 
 ## Step 5: Check everything
 
 ```bash
-npx oauth-compass doctor google
+npx @hardmachinelabs/oauth-compass doctor google
 ```
 
 You should see three lines starting with `PASS`. On Windows, a fourth `INFO` line reminds you that file permissions are not checked.
@@ -102,7 +102,7 @@ Never put the secret in browser code or commit it. OAuth Compass does not add a 
 | `Google does not allow raw IP addresses` | The redirect URL uses an IP address | Use a domain name, or `localhost` for local work. |
 | `Refusing to overwrite` | Credentials already exist | Delete the two `google.*` files in `.oauth-init/` if you want to replace them, then import again. |
 | `redirect_uri_mismatch` in the browser | Your app sent a different address from the console | Match scheme, case and final `/` exactly, then allow time for the change. |
-| `FAIL` in `doctor` | That check failed | Read the line: it names the file or `.gitignore` problem. |
+| `FAIL` in `doctor` | That check failed. `out of sync` means the `.env` no longer matches the JSON file. | Read the line: it names the file or `.gitignore` problem. |
 
 If you lost the secret, you need a new one from the client's page in the console.
 

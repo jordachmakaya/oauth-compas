@@ -24,7 +24,7 @@ export const linkedin: OAuthProvider = {
     "Create a LinkedIn app in the Developer Portal and associate a LinkedIn Page as required.",
     "Enable/confirm the Sign In with LinkedIn using OpenID Connect product access.",
     "In the Auth tab, register the displayed redirect URL.",
-    "Copy Client ID and Client Secret to a LOCAL JSON file matching docs/credentials-format.md.",
+    "Copy Client ID and Client Secret to a LOCAL JSON file. Format: https://github.com/jordachmakaya/oauth-compass/blob/main/docs/linkedin.md",
     "Confirm the app is granted the openid/profile/email scopes before live sign-in testing.",
   ],
   parseCredentials(input: unknown, expectedRedirectUri?: string) {

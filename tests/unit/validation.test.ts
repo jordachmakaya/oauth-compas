@@ -38,6 +38,9 @@ test("redirect mismatch must fail", () => {
 test("Google requires downloaded Web client structure", () => {
   assert.throws(() => getProvider("google").parseCredentials({ installed: { client_id: "id" } }));
 });
+test("guide tells npx users a command that exists for them", () => {
+  assert.ok(createGuide("github", "http://localhost:3000", "http://localhost:3000/cb").includes("npx @hardmachinelabs/oauth-compass import github"));
+});
 test("F-03: redirect URIs are stored exactly as registered", () => {
   for (const uri of ["https://EXAMPLE.com:443/cb", "http://localhost:3000", "https://example.com/Cb/"]) {
     assert.equal(validateUrl(uri, "redirect"), uri);

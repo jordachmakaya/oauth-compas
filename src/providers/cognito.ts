@@ -46,7 +46,7 @@ export const cognito: OAuthProvider = {
     "Choose Traditional web application: only this type creates a client secret, and it cannot be added later.",
     "Choose sign-in options and add the displayed callback URL as the return URL, then create the application.",
     "Copy the client ID and client secret from the app client, and note the user pool ID and Region.",
-    "Save credentials in a LOCAL JSON file matching docs/cognito.md, with the issuer built from the Region and user pool ID.",
+    "Save credentials in a LOCAL JSON file, with the issuer built from the Region and user pool ID. Format: https://github.com/jordachmakaya/oauth-compass/blob/main/docs/cognito.md",
   ],
   parseCredentials(input: unknown, expectedRedirectUri?: string) {
     const data = record(input, "Cognito credentials");

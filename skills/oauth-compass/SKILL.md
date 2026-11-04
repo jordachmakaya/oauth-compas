@@ -16,7 +16,7 @@ Use the `oauth-compass` CLI to help a user set up OAuth credentials for Google, 
 4. **Never automate a provider console.** Do not use browser automation or sign in for the user. Creating the app is a manual step that the user performs.
 5. **Never promise that credentials can be created automatically.** No such feature exists.
 6. **Never force an overwrite.** If the CLI refuses to overwrite, ask the user before deleting anything.
-7. **Do not run the interactive command.** `npx oauth-compass` and `init` are for people in a terminal. Use the commands below.
+7. **Do not run the interactive command.** `npx @hardmachinelabs/oauth-compass` and `init` are for people in a terminal. Use the commands below.
 
 ## What the user needs
 
@@ -29,7 +29,7 @@ Replace `<provider>` with `google`, `github`, `linkedin` or `cognito`. Ask for t
 **1. Show the checklist.** Run this, then present the steps to the user:
 
 ```bash
-npx oauth-compass guide <provider> --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/<provider>
+npx @hardmachinelabs/oauth-compass guide <provider> --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/<provider>
 ```
 
 **2. Hand over to the user.** Ask them to complete the console steps and tell you when they have a credentials file. Wait for them.
@@ -44,13 +44,13 @@ npx oauth-compass guide <provider> --origin http://localhost:3000 --redirect htt
 **3. Import.** Ask only for the file path, then run this from the project root:
 
 ```bash
-npx oauth-compass import <provider> --file "<path>" --redirect <redirect-url>
+npx @hardmachinelabs/oauth-compass import <provider> --file "<path>" --redirect <redirect-url>
 ```
 
 **4. Verify.**
 
 ```bash
-npx oauth-compass doctor <provider>
+npx @hardmachinelabs/oauth-compass doctor <provider>
 ```
 
 Every line must start with `PASS`. This checks local files only. It does not prove that the provider accepts the credentials.

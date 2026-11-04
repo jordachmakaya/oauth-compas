@@ -19,6 +19,7 @@
  */
 import { getProvider } from "../providers/index.js";
 import { validateUrl } from "../core/validation.js";
+export const cliCommand = "npx @hardmachinelabs/oauth-compass";
 export function createChecklist(provider: string, origin: string, redirectUri: string): string {
   const p = getProvider(provider);
   const normalizedOrigin = validateUrl(origin, "origin");
@@ -33,6 +34,6 @@ export function createChecklist(provider: string, origin: string, redirectUri: s
   ].join("\n");
 }
 export function createGuide(provider: string, origin: string, redirectUri: string): string {
-  const next = `Then run:\n  oauth-compass import ${getProvider(provider).id} --file <local-credentials.json> --redirect ${redirectUri}\n`;
+  const next = `Then run:\n  ${cliCommand} import ${getProvider(provider).id} --file <local-credentials.json> --redirect ${redirectUri}\n`;
   return `${createChecklist(provider, origin, redirectUri)}\n${next}`;
 }
