@@ -31,7 +31,7 @@
   <img src=".github/assets/demo.gif" alt="Interactive setup: choose a provider, confirm your URLs, then import and check a credentials file" width="820">
 </p>
 
-> Status: `v0.1.0` candidate, **not yet published to npm**. The `npx` commands below will work after the first release. To try it today, see [Development](#development).
+> Status: `v0.1.0`, early release. Tests pass on Linux, macOS and Windows, but real sign-ins on live provider consoles are not confirmed yet. Please [open an issue](https://github.com/jordachmakaya/oauth-compass/issues) if a step differs from what you see.
 
 ## What it does and doesn't do
 

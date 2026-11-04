@@ -2,9 +2,9 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-04
 
-First public version, planned as `0.1.0`.
+First public version. Real sign-ins on live provider consoles are not confirmed yet.
 
 ### Added
 
