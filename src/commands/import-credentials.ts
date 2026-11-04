@@ -14,7 +14,7 @@
  *   - imports: src/core/storage.ts
  *   - calls: ensureGitignore
  *   - calls: saveCredentials
- *   - used_by: src/cli.ts
+ *   - used_by: src/main.ts
  *   - tested_by: tests/e2e/cli.test.ts
  * last_update: 2026-11-04
  */

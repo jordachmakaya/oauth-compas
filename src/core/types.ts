@@ -24,6 +24,7 @@ export type OAuthCredentials = Readonly<{
   clientId: string;
   clientSecret: string;
   redirectUris: readonly string[];
+  redirectUri: string;
   importedAt: string;
 }>;
 export type SetupInput = Readonly<{ origin: string; redirectUri: string }>;

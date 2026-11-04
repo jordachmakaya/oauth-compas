@@ -36,7 +36,7 @@ export function envContent(credentials: OAuthCredentials): string {
   const q = (value: string): string => JSON.stringify(value);
   return [`${key}_CLIENT_ID=${q(credentials.clientId)}`,
     `${key}_CLIENT_SECRET=${q(credentials.clientSecret)}`,
-    `${key}_REDIRECT_URI=${q(credentials.redirectUris[0] ?? "")}`, ""].join("\n");
+    `${key}_REDIRECT_URI=${q(credentials.redirectUri)}`, ""].join("\n");
 }
 async function ensureDirectory(directory: string): Promise<void> {
   try {

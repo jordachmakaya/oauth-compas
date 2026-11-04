@@ -12,7 +12,7 @@
  *   - imports: src/providers/index.ts
  *   - imports: src/core/validation.ts
  *   - calls: validateUrl
- *   - used_by: src/cli.ts
+ *   - used_by: src/main.ts
  *   - tested_by: tests/e2e/cli.test.ts
  * last_update: 2026-11-04
  */

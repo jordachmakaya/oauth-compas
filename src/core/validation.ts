@@ -34,6 +34,9 @@ export function nonEmptyString(value: unknown, name: string): string {
   return value;
 }
 export function validateUrl(value: string, kind: "origin" | "redirect"): string {
+  if (/[\s\u0000-\u001f\u007f]/.test(value)) {
+    throw new UserError(`${kind} URL must not contain whitespace or control characters`);
+  }
   let url: URL;
   try { url = new URL(value); } catch { throw new UserError(`Invalid ${kind} URL`); }
   if (url.username || url.password || url.hash || !["http:", "https:"].includes(url.protocol)) {
@@ -46,7 +49,8 @@ export function validateUrl(value: string, kind: "origin" | "redirect"): string 
   if (kind === "origin" && (url.pathname !== "/" || url.search)) {
     throw new UserError("Origin URL must not include path or query");
   }
-  return url.toString();
+  // Providers match redirect URIs exactly, so the registered string is kept as written.
+  return kind === "origin" ? url.origin : value;
 }
 export function redirectUris(value: unknown, name: string): string[] {
   if (!Array.isArray(value) || value.length === 0 || value.length > 20) {
@@ -59,10 +63,13 @@ export function normalizeCredentials(
   expectedRedirectUri?: string,
 ): import("./types.js").OAuthCredentials {
   const parsed = redirectUris(uris, "redirect_uris");
-  if (expectedRedirectUri && !parsed.includes(validateUrl(expectedRedirectUri, "redirect"))) {
+  const [first] = parsed;
+  if (first === undefined) throw new UserError("redirect_uris must contain 1-20 redirect URLs");
+  const selected = expectedRedirectUri === undefined ? first : validateUrl(expectedRedirectUri, "redirect");
+  if (!parsed.includes(selected)) {
     throw new UserError("Expected redirect URI is not present in the credentials file");
   }
   return { provider, clientId: nonEmptyString(clientId, "client_id"),
-    clientSecret: nonEmptyString(clientSecret, "client_secret"), redirectUris: parsed,
+    clientSecret: nonEmptyString(clientSecret, "client_secret"), redirectUris: parsed, redirectUri: selected,
     importedAt: new Date().toISOString() };
 }

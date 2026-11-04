@@ -1,19 +1,62 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["tsconfig.json", "pnpm-lock.yaml"],
-  "globalPassThroughEnv": ["TEMP", "TMP", "TMPDIR"],
+  "globalDependencies": [
+    "tsconfig.json",
+    "pnpm-lock.yaml"
+  ],
+  "globalPassThroughEnv": [
+    "TEMP",
+    "TMP",
+    "TMPDIR",
+    "HOME",
+    "USERPROFILE",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "ProgramFiles",
+    "ComSpec",
+    "PATHEXT",
+    "SystemRoot"
+  ],
   "tasks": {
     "task:build": {
-      "inputs": ["src/**/*.ts", "tests/**/*.ts"],
-      "outputs": ["dist/**"]
+      "inputs": [
+        "src/**/*.ts",
+        "tests/**/*.ts"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
     },
     "task:typecheck": {
-      "inputs": ["src/**/*.ts", "tests/**/*.ts"],
+      "inputs": [
+        "src/**/*.ts",
+        "tests/**/*.ts"
+      ],
       "outputs": []
     },
-    "task:test:unit": { "dependsOn": ["task:build"], "cache": false },
-    "task:test:integration": { "dependsOn": ["task:build"], "cache": false },
-    "task:test:e2e": { "dependsOn": ["task:build"], "cache": false },
-    "task:coverage": { "dependsOn": ["task:build"], "cache": false }
+    "task:test:unit": {
+      "dependsOn": [
+        "task:build"
+      ],
+      "cache": false
+    },
+    "task:test:integration": {
+      "dependsOn": [
+        "task:build"
+      ],
+      "cache": false
+    },
+    "task:test:e2e": {
+      "dependsOn": [
+        "task:build"
+      ],
+      "cache": false
+    },
+    "task:coverage": {
+      "dependsOn": [
+        "task:build"
+      ],
+      "cache": false
+    }
   }
 }

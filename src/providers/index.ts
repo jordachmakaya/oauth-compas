@@ -13,7 +13,7 @@
  *   - imports: src/providers/github.ts
  *   - imports: src/providers/linkedin.ts
  *   - imports: src/core/types.ts
- *   - used_by: src/cli.ts
+ *   - used_by: src/main.ts
  *   - used_by: src/commands/doctor.ts
  *   - used_by: src/commands/guide.ts
  *   - used_by: src/commands/import-credentials.ts

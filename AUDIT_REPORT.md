@@ -1,21 +1,21 @@
 # Audit report — OAuth Compass CLI
 
-Date: 2026-11-04. Package: `oauth-compass-cli@0.1.0`, unpublished. Line numbers refer to the committed tree, including the `@filemeta` headers.
+Date: 2026-11-04. Package: `oauth-compass@0.1.0` (renamed from `oauth-compass-cli`), unpublished. Line numbers refer to the current tree.
 
 ## Verdict
 
-**Not ready for npm.** All review gates pass, but the installed binary does nothing on Linux: finding F-01. No source code was changed by this audit. The findings below are open unless listed under "Resolved during the audit".
+**Not yet recommended for npm.** The four most serious findings (F-01 to F-04) are fixed with regression tests, and the installed binary now works. Medium findings and live provider smoke tests remain. The findings below are open; fixed ones are listed under "Resolved during the audit".
 
 - Exposed secrets: none found (pattern scan of the tree, plus CLI output checks with synthetic secrets).
 - Overwritten credentials: none. `wx` writes refused every overwrite and symlink case tested.
 - False automation claims: none. Code and docs consistently say that app creation is manual.
-- `BLOCKER` is used for F-01 although it is outside the three classes in `CLAUDE.md`: the documented install path reports success and does nothing, so it blocks publication.
+- No open finding is a BLOCKER. F-01 was treated as one because the documented install path reported success and did nothing.
 
 ## Claims checked against behaviour
 
 | Claim (source) | Result | Evidence |
 | --- | --- | --- |
-| `npx oauth-compass-cli` / installed `oauth-compass` works (README) | **FALSE on Linux**, works on Windows; macOS not tested | F-01 |
+| `npx oauth-compass` / installed `oauth-compass` works (README) | True on Linux and Windows after the F-01 fix; macOS covered by the packed-install test once CI runs it | `tests/e2e/packed-install.test.ts`, Docker |
 | guide → import → doctor workflow (README) | True when run as `node dist/src/cli.js` | E2E, Docker, WSL |
 | Refuses overwrite (README, architecture) | True | Linux sections 5, 6; integration test |
 | Adds `.oauth-init/` to `.gitignore` before writing (architecture) | True, but also on refused imports | F-12 |
@@ -30,49 +30,15 @@ Date: 2026-11-04. Package: `oauth-compass-cli@0.1.0`, unpublished. Line numbers 
 
 ## Findings
 
-### BLOCKER
-
-**F-01 — Installed `oauth-compass` silently does nothing.** `src/cli.ts:78`
-
-The main-module guard compares `import.meta.url`, which is the real path, with a URL built from `process.argv[1]`, which is the path as invoked. npm's `bin` entry is a symlink on POSIX, so the two differ, `main()` never runs and the process exits 0. An `import` writes nothing and reports nothing. Paths containing `#` or `%20` fail the same way, as does a Windows junction (reproduced).
-
-Reproduce with the real tarball on Node 22.23.4 and 24.x, in Docker and WSL:
-
-```sh
-pnpm pack
-npm install -g ./oauth-compass-cli-0.1.0.tgz
-oauth-compass providers          # empty output, exit 0
-node "$(npm root -g)/oauth-compass-cli/dist/src/cli.js" providers   # works
-```
-
-| Install path | Linux | Windows |
-| --- | --- | --- |
-| `npm i -g`, local `.bin`, `npx` | **no-op, exit 0** | `npx` works |
-| `pnpm exec` | works (shim calls the real path) | works |
-| `node <real path>` | works | works |
-
-Fix: compare `realpathSync(process.argv[1])` with `fileURLToPath(import.meta.url)`, or use a thin bin file that always calls `main()`. Add a regression test that installs the packed tarball and runs the bin, and run it on all three CI systems. The current E2E suite calls `dist/src/cli.js` directly, which is why it cannot see this.
-
-### High
-
-**F-02 — `--redirect` is validated, then ignored in the `.env`.** `src/core/storage.ts:39`
-Always writes `redirectUris[0]`. With URIs `[http://localhost:3000/a, https://app.example.com/b]` and `--redirect https://app.example.com/b`, the output is `GITHUB_REDIRECT_URI="http://localhost:3000/a"`: the wrong environment, and no warning. Fix: pass the selected URI to `envContent`.
-
-**F-03 — Redirect URIs are rewritten before being stored.** `src/core/validation.ts:49`
-`url.toString()` changes the value: `https://EXAMPLE.com:443/cb` becomes `https://example.com/cb`, and `http://localhost:3000` gains a `/`. Google requires an exact match, including case and trailing slash, so the stored value can differ from the registered one, and the mismatch check compares normalized values and hides it. Fix: validate with `URL` but store and compare the original string.
-
-**F-04 — `guide` prints origins with a trailing slash.** `src/core/validation.ts:49`, shown by `src/commands/guide.ts`
-`http://localhost:3000` is displayed as `http://localhost:3000/`. Google states that JavaScript origins cannot contain a path component. Rejection by the live console was not tested. Fix: print `url.origin`.
-
 ### Medium
 
-**F-05 — Unknown flags are ignored, so a typo redirects secrets.** `src/cli.ts:33`
+**F-05 — Unknown flags are ignored, so a typo redirects secrets.** `src/main.ts:33`
 `import github --file in.json --oot /safe/dir` exits 0 and writes secrets to the current directory. Duplicate flags also pass silently (first wins). Fix: allowlist flags per command and reject the rest.
 
 **F-06 — Generated `.env` keeps shell metacharacters active.** `src/core/storage.ts:36`
 `JSON.stringify` does not escape `$` or backticks, so a value like `x$(touch PWNED)` runs if the file is `source`d, and tools such as dotenv-expand may interpolate it. Fix: reject control characters, and single-quote values containing `$`, backtick or backslash.
 
-**F-08 — URL validation is looser than provider rules.** `src/core/validation.ts:39`
+**F-08 — URL validation is looser than provider rules.** `src/core/validation.ts:42`
 Accepted but disallowed by Google: empty fragment `https://example.com/cb#`, wildcard `https://*.example.com/cb`, traversal `/a/../cb` and `/%2e%2e/cb` (silently collapsed), raw IP `https://1.2.3.4/cb`. Open-redirect style parameters such as `?next=https://evil.example/` also pass. Fix: check the raw string for `#`, `*`, `..`, and add provider-level rules to the adapters.
 
 **F-09 — Google step omits that the secret is shown only once.** `src/providers/google.ts:31`
@@ -87,7 +53,7 @@ Google shows and allows download of the full secret only at creation (clients cr
 - On Windows, no permission check runs and the output still says PASS. A generated file showed inherited ACLs, including a `Modify` entry for a local group (`icacls`, in the temp directory). Fix: print an explicit "not verified on Windows" line, validate `.env`, and honour negation or call `git check-ignore`.
 
 **F-18 — Test suite cannot detect installation or storage defects.** `tests/`
-Coverage reached 94.6% of lines with F-01 present. There is no packed-install test and no symlink, directory-permission or `.env` content test. Note that adding comment headers raised the reported line figure to 96.8% with no new test; branch coverage (about 72%) is the more useful number. Thresholds in `.c8rc.json` are floors from these measurements, not a quality statement.
+Coverage reached 94.6% of lines while F-01 was present. A packed-install test now exists; there is still no symlink or directory-permission test in the repository. Note that adding comment headers raised the reported line figure to 96.8% with no new test; branch coverage (about 72%) is the more useful number. Thresholds in `.c8rc.json` are floors from these measurements, not a quality statement.
 
 **F-20 — Unrelated script at the project root.** `codex-install-fixed.ps1`
 A 71 KB installer for OpenAI Codex, referenced by nothing in the project. It has a signature block, but `Get-AuthenticodeSignature` returns `NotSigned`, and the name suggests hand edits. Static review found only OpenAI and GitHub download URLs, and it was **not executed**. It is not in the npm package and was deliberately left out of the commit; it stays untracked on disk for the owner to keep or delete. SHA-256: `4CAB8C639C629D22754B448DC418BC58658BEC5CDF2729044A419F2C56CEBDFF`.
@@ -99,7 +65,7 @@ A 71 KB installer for OpenAI Codex, referenced by nothing in the project. It has
 - **F-13** `src/core/storage.ts:66` — Two sequential writes, not atomic. A write failure was rolled back correctly in testing, but a crash between writes would leave one file and block re-import (by inspection, not reproduced). Fix: temp file plus rename or link.
 - **F-14** `src/commands/import-credentials.ts:29`, `src/core/validation.ts:31` — No input size limit (64 MiB accepted). Leading/trailing spaces and NUL characters are kept in secrets. The oversize error says "non-empty".
 - **F-15** `src/commands/import-credentials.ts:29` — A UTF-8 BOM makes import fail with a syntax message. Some Windows tools write one, and GitHub/LinkedIn files are hand-made.
-- **F-16** `src/cli.ts:71`, `src/providers/index.ts:31` — Raw user input is echoed: a secret mistyped as a provider appears on stderr, and ANSI escapes are not stripped. There is no `--version`, `guide --help` fails, and `--out` pointing at a missing path or a file blames `.gitignore`.
+- **F-16** `src/main.ts:71`, `src/providers/index.ts:31` — Raw user input is echoed: a secret mistyped as a provider appears on stderr, and ANSI escapes are not stripped. There is no `--version`, `guide --help` fails, and `--out` pointing at a missing path or a file blames `.gitignore`.
 - **F-17** `src/providers/google.ts:39` — `import google` accepts an undocumented flat `{provider:"google",...}` shape, needed only by `doctor`. Fix: keep it out of the import path.
 - **F-19** Docs — GitHub allows up to 10 callback URLs and advises `127.0.0.1` or `::1` over `localhost`, while examples use `localhost`. LinkedIn docs say to add callbacks via HTTPS, and whether it accepts the README's `http://localhost` callback is unverified. LinkedIn ignores query parameters on redirect URLs. The help text "never sent to this CLI maintainer" is odd wording.
 - **F-21** Packaging — `.npmignore` is redundant with `files`. Published source maps point to `../../src`, which is not packaged. `@types/node` 25 is newer than the supported Node 22/24, so newer APIs would typecheck. No SBOM is committed.
@@ -113,8 +79,13 @@ A 71 KB installer for OpenAI Codex, referenced by nothing in the project. It has
 | CI actions on mutable tags, `*-latest` runners | Actions pinned to commit SHAs; runners named |
 | `glob` / `minimatch` advisories via c8 (dev only) | Overrides to `glob` 14.0.3 and `minimatch` 11.0.4; `pnpm audit` clean; coverage still works |
 | `VERIFICATION.md` out of date | Rewritten |
+| **F-01 (BLOCKER)** installed binary was a silent no-op because the guard compared the invoked path with the real path | Guard removed: `src/cli.ts` always runs `main()` from `src/main.ts`. `tests/e2e/packed-install.test.ts` installs the tarball with npm in a path containing a space and `#`, then runs the binary |
+| **F-02 (High)** `--redirect` was ignored in the `.env` | `OAuthCredentials.redirectUri` carries the selected URI to `envContent` |
+| **F-03 (High)** redirect URIs were rewritten, hiding mismatches | Original string stored and compared exactly; whitespace and control characters rejected because `URL` would strip them |
+| **F-04 (High)** `guide` printed origins with a trailing slash | `validateUrl` returns `url.origin` for origins |
+| Quick start showed contributor commands (`node dist/src/cli.js`) | README rewritten around `npx oauth-compass` with step-by-step usage |
 
-Also added at the owner's request: Turborepo (tests never cached, per rule 8), c8 coverage, Dependabot, `@filemeta` headers.
+Also added at the owner's request: provider guides, the `skill install` command and bundled agent skill (no `postinstall` hook, by design), Turborepo (tests never cached, per rule 8), c8 coverage, Dependabot, `@filemeta` headers. Each fix above was first shown to fail with its regression test on the unfixed code (6 failures) before the change. Provider rules behind F-03 and F-04 are the Google pages listed below, checked on 2026-11-04.
 
 ## Tests run on 2026-11-04
 
@@ -126,6 +97,9 @@ Also added at the owner's request: Turborepo (tests never cached, per rule 8), c
 | All gates from a clean copy, frozen lockfile | Docker `node:24.16.0-slim` | Pass, lockfile unchanged |
 | Real tarball install and behaviour (F-01, F-07, symlinks) | Docker and WSL, Node 22.23.4 and 24.x | F-01 and F-07 reproduced; symlink refusals pass |
 | Real tarball install | Windows via npm and pnpm | Works |
+| Fixed tarball: `npm i -g`, local `.bin`, `npx`, `pnpm exec`, `pnpm dlx`, `pnpm add -g` | Docker, Node 22.23.4 and 24.16.0 | Works |
+| All gates after the fixes (16 tests) | Windows; Docker Node 22.23.4 and 24.16.0 | Pass |
+| Provider guides: every command run verbatim against the tarball | Docker, Node 22.23.4 and 24.16.0 | Pass |
 
 Symlink cases gave these results on Linux: live and dangling output links, symlinked `.oauth-init` and symlinked `.gitignore` were all refused with no write through the link. A dangling link gives only "Unexpected error". Non-root write refusal also held. Windows symlink cases could not run (`EPERM`). Tarballs used for F-01 predate the `@filemeta` headers and Turborepo, neither of which touches the guard logic.
 
@@ -140,20 +114,22 @@ Symlink cases gave these results on Linux: live and dangling output links, symli
 - LinkedIn self-service access: <https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access>
 - LinkedIn redirect rules: <https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow>
 - LinkedIn app and Page association: <https://www.linkedin.com/help/linkedin/answer/a526048>
+- GitHub OAuth app settings: <https://docs.github.com/en/apps/oauth-apps/maintaining-oauth-apps/modifying-an-oauth-app>
+- GitHub secret handling: <https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/best-practices-for-creating-an-oauth-app>
+- `gh auth login` (no OAuth App registration): <https://cli.github.com/manual/gh_auth_login>
+- Skill locations: <https://code.claude.com/docs/en/skills> (first 100,000 of about 119,000 characters read)
+- Skill format: <https://agentskills.io/specification>
 
 ## Residual risks
 
 - macOS was never tested locally; only CI can cover it. F-01 is expected there, as npm links `bin` the same way.
 - No live provider console or real OAuth app was used, so provider acceptance of specific URLs is inferred from docs. Disposable-app smoke tests are still needed before release.
-- `pnpm dlx` and `pnpm add -g` were not tested.
-- `oauth-compass-cli` and `oauth-compass` returned 404 on the npm registry on 2026-11-04. That suggests the names are free but reserves nothing.
+- `oauth-compass` returned 404 on the npm registry on 2026-11-04. That suggests the name is free but reserves nothing.
 - `.gitignore` cannot protect files that are already tracked, and credential files are not encrypted (documented in SECURITY.md).
 - No npm provenance, code scanning or branch protection is configured yet.
 
 ## Recommended order before publishing
 
-1. F-01, with the packed-install test (F-18).
-2. F-02, F-03, F-04: wrong or rejected redirect values.
-3. F-05, F-06, F-08, F-09, F-11.
-4. F-10, then the Low items.
-5. CI green on all three systems, then manual smoke tests with disposable apps.
+1. F-05, F-06, F-08, F-09, F-11.
+2. F-10, then the Low items.
+3. CI green on all three systems, then manual smoke tests with disposable apps.

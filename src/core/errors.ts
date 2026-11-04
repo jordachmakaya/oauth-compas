@@ -9,8 +9,9 @@
  * inputs: [message]
  * outputs: [UserError]
  * relations:
- *   - used_by: src/cli.ts
+ *   - used_by: src/main.ts
  *   - used_by: src/commands/import-credentials.ts
+ *   - used_by: src/commands/install-skill.ts
  *   - used_by: src/core/storage.ts
  *   - used_by: src/core/validation.ts
  *   - used_by: src/providers/google.ts

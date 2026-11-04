@@ -2,7 +2,7 @@
 
 ## Boundaries
 
-`src/cli.ts` (argument parsing) → `commands/` (use cases) → `providers/` (provider metadata + credential adapters) → `core/` (validation and storage).
+`src/cli.ts` (executable, always runs `main`) → `src/main.ts` (argument parsing) → `commands/` (use cases) → `providers/` (provider metadata + credential adapters) → `core/` (validation and storage).
 
 `OAuthProvider` is an interface with a discriminated provider ID, a console URL, guided setup steps and `parseCredentials(input: unknown)`; **no** provider has a silent remote-creation contract. This is intentional: none of the current MVP providers has a portable public workflow for fully creating conventional OAuth Web credentials.
 
@@ -13,6 +13,10 @@
 - Secrets never appear in normal stdout/stderr; no CLI flags accepting secrets.
 - Output is write-once (`wx`) with owner-only permissions on POSIX; `.oauth-init/` is added to `.gitignore` prior to writing.
 - Password/secret storage within a user-controlled workspace is not a secret manager. Production secrets should use a vault or environment injection.
+
+## Agent skill
+
+`skills/oauth-compass/SKILL.md` ships in the package. `oauth-compass skill install` copies it to `.claude/skills/oauth-compass/` on request. A `postinstall` hook is deliberately not used: it would write outside the project without consent, and package managers may block it.
 
 ## Future providers
 

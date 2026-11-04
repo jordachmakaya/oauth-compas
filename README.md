@@ -1,86 +1,225 @@
 # OAuth Compass CLI
 
-**A local-first, three-provider OAuth credential setup assistant** for Google, GitHub and LinkedIn. TypeScript (strict), Node.js, zero runtime dependencies. **No remote app creation, no telemetry, no provider credentials uploaded.**
+[![Tests](https://img.shields.io/github/actions/workflow/status/jordachmakaya/oauth-compass/ci.yml?branch=main&label=tests)](https://github.com/jordachmakaya/oauth-compass/actions/workflows/ci.yml)
+![Coverage gate](https://img.shields.io/badge/coverage%20gate-%E2%89%A590%25%20lines-brightgreen)
+![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)
+![pnpm](https://img.shields.io/badge/pnpm-managed-F69220?logo=pnpm&logoColor=white)
+![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-> Status: `v0.1.0` candidate. CLI, validation, secure local export and offline E2E tests included. OAuth app creation still requires the official consoles. Package has **not** been published to npm.
+**A local-first OAuth credential setup assistant** for Google, GitHub and LinkedIn. It gives you a setup checklist, then turns the credentials you obtained into clean JSON and `.env` files.
 
-## Why
+**No remote app creation, no telemetry, no credentials uploaded.** You still create the OAuth app yourself in the provider's official console.
 
-Registering OAuth clients requires different consoles and credential formats. OAuth Compass generates a reliable setup checklist and normalizes locally obtained credentials into JSON + environment files. Unlike unsafe "one-click" scripts, it does not automate browser login or pretend to support unpublished provider APIs.
+> Status: `v0.1.0` candidate, **not yet published to npm**. The `npx` commands below will work after the first release. To try it today, see [Development](#development).
+
+## What it does and doesn't do
+
+**OAuth Compass does:**
+
+- Print a setup checklist for each provider, with your own URLs.
+- Validate the credentials file you provide: format, HTTPS rules and redirect URL match.
+- Write a JSON file and a `.env` file to `.oauth-init/`, with owner-only permissions on macOS and Linux.
+- Add `.oauth-init/` to `.gitignore`, and refuse to overwrite existing credentials.
+- Check the local result with `doctor`.
+- Install a skill for AI coding agents, when you ask it to.
+
+**OAuth Compass does not:**
+
+- Create OAuth apps, client IDs or secrets. You do that in the provider's console.
+- Open a browser or sign in to a provider.
+- Send anything over the network. It has no telemetry and never contacts a provider.
+- Prove that your credentials work. `doctor` checks local files only, so test a real sign-in in your app.
+- Add sign-in to your app. It has no callback handler or token exchange, and issues no tokens.
+- Encrypt your secrets or replace a secret manager. Use a vault or environment injection in production.
+- Delete your input file. That's up to you.
+- Run anything at install time. There is no `postinstall` script.
 
 ## Supported providers
 
-| Provider | App type | Creation | Input | Recommended basic scopes |
+| Provider | App type | Created in | You provide | Suggested scopes |
 | --- | --- | --- | --- | --- |
-| Google | Web OAuth client | Google Auth Platform (manual) | Downloaded Google `web` JSON | `openid email profile` |
-| GitHub | OAuth App | Developer settings (manual) | Locally assembled JSON | `read:user user:email` (as needed) |
-| LinkedIn | Sign In with LinkedIn using OIDC | Developer Portal (manual, product access may be required) | Locally assembled JSON | `openid profile email` |
+| Google | Web OAuth client | Google Auth Platform (manual) | Downloaded `web` JSON | `openid email profile` |
+| GitHub | OAuth App | Developer settings (manual) | Small local JSON file | `read:user user:email` (as needed) |
+| LinkedIn | Sign In with LinkedIn using OIDC | Developer Portal (manual) | Small local JSON file | `openid profile email` |
 
-*GitHub Apps can be more appropriate than OAuth Apps for repository integrations.*
+GitHub Apps can be more appropriate than OAuth Apps for repository integrations.
 
-## Requirements and local development
+## Provider guides
 
-Developing requires Node.js and pnpm. This repository uses pnpm only and is reproducible: Node.js is pinned in `.nvmrc` and `devEngines`, pnpm in `packageManager` (`corepack enable pnpm` activates it), direct dependencies in the `pnpm-workspace.yaml` catalog, and every transitive package in `pnpm-lock.yaml`. Consumers of the published CLI only need Node.js 22+. The npm registry package name is a **proposal**.
+New to OAuth? Follow the beginner guide for your provider. Each one lists what you need beforehand and walks through every step.
+
+- [Google](docs/google.md)
+- [GitHub](docs/github.md)
+- [LinkedIn](docs/linkedin.md)
+
+## Quick start
+
+You only need Node.js 22+ and a provider account: no `gh`, `gcloud` or other tool to set up. The examples use GitHub; replace `github` with `google` or `linkedin` for the others.
+
+### Step 1: Check the CLI runs
+
+```bash
+npx oauth-compass providers
+```
+
+Expected result:
+
+```text
+google
+github
+linkedin
+```
+
+Using pnpm? Replace `npx` with `pnpm dlx`. For regular use, run `npm install -g oauth-compass` once, then drop the `npx`.
+
+### Step 2: Get your setup checklist
+
+Pass your app's URL and its OAuth callback URL.
+
+```bash
+npx oauth-compass guide github --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/github
+```
+
+Expected result:
+
+```text
+GitHub OAuth setup
+Console: https://github.com/settings/developers
+
+Authorized origin / homepage: http://localhost:3000
+Callback / redirect URL: http://localhost:3000/api/auth/callback/github
+Suggested scopes: read:user user:email
+
+1. Open Settings > Developer settings > OAuth Apps > New OAuth App.
+2. Register the public homepage URL and the displayed callback URL.
+3. Generate a client secret in the OAuth App settings.
+4. Save credentials in a LOCAL JSON file matching docs/credentials-format.md.
+5. GitHub Apps may be a better choice for repository integrations; this MVP targets OAuth Apps.
+
+Then run:
+  oauth-compass import github --file <local-credentials.json> --redirect http://localhost:3000/api/auth/callback/github
+
+Note: the CLI cannot create third-party OAuth apps or disclose client secrets automatically.
+```
+
+### Step 3: Create the app and save its credentials
+
+This step is manual. Follow the checklist in the provider's console.
+
+- **Google:** download the client JSON right after creating the client. Google shows the full secret only at creation.
+- **GitHub and LinkedIn:** copy the values into a local file in your home folder, for example `github-oauth.json`. Never commit this file.
+
+```json
+{"client_id":"PLACEHOLDER_ID","client_secret":"PLACEHOLDER_SECRET","redirect_uris":["http://localhost:3000/api/auth/callback/github"]}
+```
+
+Details are in the [provider guides](#provider-guides) and [credential formats](docs/credentials-format.md).
+
+### Step 4: Import the credentials
+
+Run this from your project's root folder.
+
+```bash
+npx oauth-compass import github --file "$HOME/github-oauth.json" --redirect http://localhost:3000/api/auth/callback/github
+```
+
+Expected result:
+
+```text
+Credentials stored locally:
+  /your/project/.oauth-init/github.credentials.json
+  /your/project/.oauth-init/github.env
+Never commit these files.
+```
+
+The CLI also adds `.oauth-init/` to `.gitignore`. It never overwrites existing credentials and does not delete your input file, so delete `github-oauth.json` yourself.
+
+### Step 5: Check the result
+
+```bash
+npx oauth-compass doctor github
+```
+
+Expected result:
+
+```text
+PASS .oauth-init/ excluded by .gitignore
+PASS /your/project/.oauth-init/github.credentials.json exists
+PASS /your/project/.oauth-init/github.env exists
+```
+
+On Windows, `doctor` does not verify file permissions. Check NTFS ACLs separately.
+
+### Step 6: Use the values in your app
+
+`.oauth-init/github.env` contains:
+
+```dotenv
+GITHUB_CLIENT_ID="PLACEHOLDER_ID"
+GITHUB_CLIENT_SECRET="PLACEHOLDER_SECRET"
+GITHUB_REDIRECT_URI="http://localhost:3000/api/auth/callback/github"
+```
+
+Use these only on your application's **trusted server**, never in client-side code. The CLI does not implement an OAuth callback handler or token exchange.
+
+## Commands
+
+| Command | What it does | Expected result | Exit code |
+| --- | --- | --- | --- |
+| `oauth-compass providers` | Lists supported providers | One provider per line | `0` |
+| `oauth-compass guide <provider> --origin URL --redirect URL` | Prints the manual setup checklist | Console link, URLs, scopes and numbered steps | `0` |
+| `oauth-compass import <provider> --file PATH [--redirect URL] [--out DIRECTORY]` | Validates a local JSON file and writes the credential files | Paths of the two created files | `0` |
+| `oauth-compass doctor <provider> [--out DIRECTORY]` | Checks `.gitignore`, the files and their permissions | One `PASS` or `FAIL` line per check | `0` if all pass, `1` otherwise |
+| `oauth-compass skill install [--out DIRECTORY]` | Installs the AI agent skill | Path of the created `SKILL.md` | `0` |
+| `oauth-compass --help` | Shows usage | Command list | `0` |
+
+`<provider>` is `google`, `github` or `linkedin`.
+
+Good to know:
+
+- `--out` sets the folder that receives `.oauth-init/`. It defaults to the current folder.
+- `--redirect` on `import` must match a URI in your file exactly. The `.env` uses that URI, or the first one in the file if you omit it.
+- Any error prints `Error: ...` on stderr and exits with `1`. For example, a second import prints `Error: Refusing to overwrite ...`.
+- Never pass secrets as command-line arguments.
+
+## Using an AI coding agent
+
+OAuth Compass includes a skill that teaches agents such as Claude Code to run this workflow safely: the agent runs local commands, never asks for your secret, and leaves the console steps to you. It follows the [Agent Skills](https://agentskills.io) format.
+
+The skill ships inside the package, but nothing is written until you ask. Run this from your project's root folder:
+
+```bash
+npx oauth-compass skill install
+```
+
+Expected result:
+
+```text
+Agent skill installed:
+  /your/project/.claude/skills/oauth-compass/SKILL.md
+```
+
+Commit that file to share the skill with your team. To make it available in all your projects, add `--out "$HOME"`. Existing skill files are never overwritten. Other agents may read skills from a different folder: copy `SKILL.md` there.
+
+## Why
+
+Registering OAuth clients means dealing with different consoles and credential formats. OAuth Compass gives you a reliable checklist and normalizes the credentials you obtained locally. Unlike "one-click" scripts, it does not automate browser login or pretend to support unpublished provider APIs.
+
+## Development
+
+For contributors working from a clone. Users of the published CLI do not need any of this.
 
 ```bash
 pnpm install --frozen-lockfile
 pnpm run build
 node dist/src/cli.js --help
-pnpm test
 ```
 
-After publishing the verified package, intended invocation:
+This repository uses pnpm only and is reproducible: Node.js is pinned in `.nvmrc` and `devEngines`, pnpm in `packageManager` (`corepack enable pnpm` activates it), direct dependencies in the `pnpm-workspace.yaml` catalog, and every transitive package in `pnpm-lock.yaml`.
 
-```bash
-npx oauth-compass-cli@latest --help
-pnpm dlx oauth-compass-cli@latest --help
-```
-
-The executable binary is named `oauth-compass`:
-
-```bash
-npx --package oauth-compass-cli@latest oauth-compass providers
-```
-
-## Guided workflow (local development)
-
-```bash
-node dist/src/cli.js providers
-node dist/src/cli.js guide google --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/google
-node dist/src/cli.js guide github --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/github
-node dist/src/cli.js guide linkedin --origin http://localhost:3000 --redirect http://localhost:3000/api/auth/callback/linkedin
-```
-
-Complete the displayed manual steps in the corresponding official provider console. For Google, download the Web application client JSON. For GitHub / LinkedIn, locally create the small JSON format described in [credential formats](docs/credentials-format.md).
-
-```bash
-node dist/src/cli.js import google --file ~/Downloads/client_secret.json --redirect http://localhost:3000/api/auth/callback/google
-node dist/src/cli.js doctor google
-```
-
-Change `google` to `github` or `linkedin` for those providers. The importer creates `.oauth-init/<provider>.credentials.json` and `.oauth-init/<provider>.env` under the working directory, refuses overwrite, and adds `.oauth-init/` to `.gitignore`. It does **not** delete your input file.
-
-### Generated `.env` example (fake values)
-
-```dotenv
-GOOGLE_CLIENT_ID="PLACEHOLDER_CLIENT_ID"
-GOOGLE_CLIENT_SECRET="PLACEHOLDER_CLIENT_SECRET"
-GOOGLE_REDIRECT_URI="http://localhost:3000/api/auth/callback/google"
-```
-
-Use these only on your application's **trusted server**, never in client-side Nuxt/Next code. The CLI does not implement an OAuth callback handler or token exchange.
-
-## Commands
-
-```text
-oauth-compass providers
-oauth-compass guide <google|github|linkedin> --origin URL --redirect URL
-oauth-compass import <google|github|linkedin> --file PATH [--redirect URL] [--out DIRECTORY]
-oauth-compass doctor <google|github|linkedin> [--out DIRECTORY]
-oauth-compass --help
-```
-
-## Testing
+### Testing
 
 ```bash
 pnpm run typecheck
@@ -93,11 +232,11 @@ pnpm run pack:check
 
 These scripts run through [Turborepo](https://turborepo.com). Build and typecheck results are cached; tests and coverage are never cached, so a pass always means the tests ran. `pnpm run coverage` enforces the thresholds in `.c8rc.json` and writes `coverage/lcov.info` and an HTML report. Turborepo collects anonymous telemetry by default: run `pnpm exec turbo telemetry disable` to opt out locally (CI already disables it). The published CLI itself has no telemetry and zero runtime dependencies.
 
-E2E tests invoke the **compiled CLI** as a child process for every provider, exercise guide → import → doctor → refusal to overwrite and assert that synthetic secrets are not printed. No external accounts, browsers or provider secrets are required. CI matrix includes Node 22/24 on Ubuntu, macOS and Windows.
+E2E tests run the compiled CLI for every provider and assert that synthetic secrets are not printed. A separate test installs the packed tarball like a consumer and runs the `oauth-compass` binary. No external accounts, browsers or provider secrets are required. CI covers Node 22 and 24 on Ubuntu, macOS and Windows.
 
 ## Architecture and security
 
-See [architecture](docs/architecture.md), [security](SECURITY.md), [credential formats](docs/credentials-format.md) and [agent audit instructions](CLAUDE.md). Native Node.js `node:fs`, `node:test` and `node:child_process` keep runtime dependency count at zero. This MVP does not automatically create real provider apps or issue tokens.
+See [architecture](docs/architecture.md), [security](SECURITY.md), [credential formats](docs/credentials-format.md), the [audit report](AUDIT_REPORT.md) and [agent audit instructions](CLAUDE.md). This project does not create real provider apps or issue tokens.
 
 ## Official references
 
@@ -110,4 +249,4 @@ See [architecture](docs/architecture.md), [security](SECURITY.md), [credential f
 
 ## Contributing and license
 
-Open a bug report with a synthetic reproduction, no credentials. Run typecheck + all tests before sending a PR. Security issues should be reported privately. MIT license; see LICENSE.
+Open a bug report with a synthetic reproduction, no credentials. Run typecheck and all tests before sending a PR. Report security issues privately. MIT license; see [LICENSE](LICENSE).

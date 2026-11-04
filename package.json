@@ -1,5 +1,5 @@
 {
-  "name": "oauth-compass-cli",
+  "name": "oauth-compass",
   "version": "0.1.0",
   "description": "Local-first guided OAuth credential setup for Google, GitHub and LinkedIn",
   "type": "module",
@@ -13,7 +13,8 @@
     "LICENSE",
     "SECURITY.md",
     "CLAUDE.md",
-    "docs"
+    "docs",
+    "skills"
   ],
   "engines": {
     "node": ">=22.0.0"

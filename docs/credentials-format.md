@@ -1,5 +1,7 @@
 # Credential input formats
 
+For step-by-step instructions, see the [Google](google.md), [GitHub](github.md) and [LinkedIn](linkedin.md) guides.
+
 Secrets must be obtained from each provider's official developer console. No browser automation, scraping, or third-party API impersonation.
 
 ## Google (downloaded file)
@@ -24,5 +26,7 @@ Outputs in `.oauth-init/`:
 
 - `<provider>.credentials.json` — normalized provider-specific JSON **containing the secret**.
 - `<provider>.env` — app-friendly env variables **containing the secret**.
+
+Redirect URIs are stored exactly as written, because providers compare them exactly. The `.env` uses the URI passed to `--redirect`, or the first URI in the file.
 
 Neither output is safe for public repositories or client-side bundles. Env interpolation is not performed. The CLI does not issue OAuth tokens or configure your app's auth library.
