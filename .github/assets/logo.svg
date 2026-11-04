@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="OAuth Compass logo: a compass with a keyhole at its centre">
+  <title>OAuth Compass</title>
+  <rect width="128" height="128" rx="28" fill="#1e1e2e"/>
+  <path d="M99.500 36.300A45 45 0 1 0 99.500 91.700" fill="none" stroke="#cdd6f4" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="64" cy="19" r="8" fill="#89dceb"/>
+  <circle cx="109" cy="64" r="8" fill="#a6e3a1"/>
+  <circle cx="64" cy="109" r="8" fill="#cba6f7"/>
+  <circle cx="19" cy="64" r="8" fill="#f38ba8"/>
+  <g transform="rotate(40 64 64)">
+    <path d="M64 26 77 64H51z" fill="#fab387"/>
+    <path d="M64 102 77 64H51z" fill="#89b4fa"/>
+  </g>
+  <circle cx="64" cy="64" r="13" fill="#1e1e2e"/>
+  <circle cx="64" cy="60.5" r="4.5" fill="#f9e2af"/>
+  <path d="M62 62h4l2 9.500h-8z" fill="#f9e2af"/>
+</svg>

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/logo.svg" alt="OAuth Compass logo" width="112">
+</p>
+
 # OAuth Compass CLI
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/jordachmakaya/oauth-compass/ci.yml?branch=main&label=tests)](https://github.com/jordachmakaya/oauth-compass/actions/workflows/ci.yml)
@@ -11,6 +15,17 @@
 **A local-first OAuth credential setup assistant** for Google, GitHub, LinkedIn and Amazon Cognito. It gives you a setup checklist, then turns the credentials you obtained into clean JSON and `.env` files.
 
 **No remote app creation, no telemetry, no credentials uploaded.** You still create the OAuth app yourself in the provider's official console.
+
+<p align="center">
+  Created by <a href="https://github.com/jordachmakaya">Jordach M. Makaya</a>
+</p>
+
+<p align="center">
+  <a href="docs/google.md"><img src="https://img.shields.io/badge/works%20with-Google-89b4fa?style=for-the-badge" alt="Works with Google"></a>
+  <a href="docs/github.md"><img src="https://img.shields.io/badge/works%20with-GitHub-89b4fa?style=for-the-badge" alt="Works with GitHub"></a>
+  <a href="docs/linkedin.md"><img src="https://img.shields.io/badge/works%20with-LinkedIn-89b4fa?style=for-the-badge" alt="Works with LinkedIn"></a>
+  <a href="docs/cognito.md"><img src="https://img.shields.io/badge/works%20with-Amazon%20Cognito-89b4fa?style=for-the-badge" alt="Works with Amazon Cognito"></a>
+</p>
 
 <p align="center">
   <img src=".github/assets/demo.gif" alt="Interactive setup: choose a provider, confirm your URLs, then import and check a credentials file" width="820">
@@ -282,6 +297,14 @@ See [architecture](docs/architecture.md), [security](SECURITY.md), [credential f
 - [GitHub — OAuth App security](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/best-practices-for-creating-an-oauth-app)
 - [LinkedIn — Developer onboarding](https://www.linkedin.com/help/linkedin/answer/a526048)
 - [LinkedIn — API product permissions](https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access)
+
+## Author
+
+Created and maintained by [Jordach M. Makaya](https://github.com/jordachmakaya).
+
+## Trademarks
+
+OAuth Compass is an independent project. It is not affiliated with, endorsed by or sponsored by Google, GitHub, LinkedIn or Amazon. Provider names are trademarks of their respective owners and are used only to say which services this tool works with.
 
 ## Contributing and license
 

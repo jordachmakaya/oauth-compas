@@ -2,6 +2,15 @@
   "name": "oauth-compass",
   "version": "0.1.0",
   "description": "Local-first guided OAuth credential setup for Google, GitHub and LinkedIn",
+  "author": "Jordach M. Makaya (https://github.com/jordachmakaya)",
+  "homepage": "https://github.com/jordachmakaya/oauth-compass#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordachmakaya/oauth-compass.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jordachmakaya/oauth-compass/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@11.15.1",
   "bin": {
