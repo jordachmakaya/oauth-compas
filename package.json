@@ -1,0 +1,60 @@
+{
+  "name": "oauth-compass-cli",
+  "version": "0.1.0",
+  "description": "Local-first guided OAuth credential setup for Google, GitHub and LinkedIn",
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "bin": {
+    "oauth-compass": "./dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CLAUDE.md",
+    "docs"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.16.0",
+      "onFail": "warn"
+    }
+  },
+  "scripts": {
+    "build": "turbo run task:build",
+    "typecheck": "turbo run task:typecheck",
+    "test": "turbo run task:test:unit task:test:integration task:test:e2e",
+    "test:unit": "turbo run task:test:unit",
+    "test:integration": "turbo run task:test:integration",
+    "test:e2e": "turbo run task:test:e2e",
+    "coverage": "turbo run task:coverage",
+    "pack:check": "pnpm pack --dry-run",
+    "prepack": "pnpm run build",
+    "task:build": "tsc -p tsconfig.json",
+    "task:typecheck": "tsc --noEmit -p tsconfig.json",
+    "task:test:unit": "node --test dist/tests/unit/*.test.js",
+    "task:test:integration": "node --test dist/tests/integration/*.test.js",
+    "task:test:e2e": "node --test dist/tests/e2e/*.test.js",
+    "task:coverage": "c8 node --test dist/tests/**/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "c8": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:"
+  },
+  "license": "MIT",
+  "keywords": [
+    "oauth",
+    "cli",
+    "typescript",
+    "google",
+    "github",
+    "linkedin"
+  ]
+}

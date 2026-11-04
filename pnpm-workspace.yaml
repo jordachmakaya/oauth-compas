@@ -1,0 +1,16 @@
+# Single source of truth for dependency versions. Versions are exact; pnpm-lock.yaml
+# pins every transitive package with its integrity hash.
+catalogMode: strict
+savePrefix: ''
+
+catalog:
+  '@types/node': 25.1.0
+  c8: 12.0.0
+  turbo: 2.11.10
+  typescript: 5.8.3
+
+# Dev-only transitive deps of c8 > test-exclude, moved to patched releases:
+# GHSA-3g3m-2fjr-6pw4 (glob), GHSA-g3hv-75wg-m249 (minimatch).
+overrides:
+  glob: 14.0.3
+  minimatch: 11.0.4
