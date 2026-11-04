@@ -15,6 +15,7 @@
  *   - calls: ensureGitignore
  *   - calls: saveCredentials
  *   - used_by: src/main.ts
+ *   - used_by: src/commands/init.ts
  *   - tested_by: tests/e2e/cli.test.ts
  * last_update: 2026-11-04
  */

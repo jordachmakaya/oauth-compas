@@ -48,7 +48,7 @@ test("packed tarball: installed binary runs and writes credentials", { timeout: 
 
     const providers = runBin(project, "providers");
     assert.equal(providers.status, 0, providers.stderr);
-    assert.deepEqual(providers.stdout.trim().split(/\r?\n/), ["google", "github", "linkedin"]);
+    assert.deepEqual(providers.stdout.trim().split(/\r?\n/), ["google", "github", "linkedin", "cognito"]);
 
     const input = { client_id: "test-id", client_secret: "PACK_SECRET_DO_NOT_PRINT", redirect_uris: ["http://localhost:3000/cb"] };
     await writeFile(join(project, "input.json"), JSON.stringify(input));

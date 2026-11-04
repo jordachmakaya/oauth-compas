@@ -28,8 +28,8 @@ test("localhost HTTP is allowed; insecure remote callback is denied", () => {
 test("URL with embedded credentials rejected", () => {
   assert.throws(() => validateUrl("https://user:pass@example.com/callback", "redirect"));
 });
-test("all three provider adapters are registered", () => {
-  for (const id of ["google", "github", "linkedin"]) assert.equal(getProvider(id).id, id);
+test("all provider adapters are registered", () => {
+  for (const id of ["google", "github", "linkedin", "cognito"]) assert.equal(getProvider(id).id, id);
   assert.throws(() => getProvider("discord"));
 });
 test("redirect mismatch must fail", () => {

@@ -2,6 +2,8 @@
 
 This guide takes you from nothing to working LinkedIn OAuth credentials in your project. It takes about 15 minutes. You create the app yourself in LinkedIn's Developer Portal; OAuth Compass checks and stores the result.
 
+**In a hurry?** Run `npx oauth-compass` and answer the questions. This guide explains the same steps in detail.
+
 ## Before you start
 
 **You need:**
@@ -69,7 +71,7 @@ This command works in PowerShell and in macOS and Linux terminals. In the older 
 npx oauth-compass doctor linkedin
 ```
 
-You should see three lines starting with `PASS`. On Windows, `doctor` does not check file permissions.
+You should see three lines starting with `PASS`. On Windows, a fourth `INFO` line reminds you that file permissions are not checked.
 
 ## Step 6: Finish up
 

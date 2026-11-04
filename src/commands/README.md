@@ -8,6 +8,7 @@ This folder contains the use cases called by `src/main.ts`.
 | `guide.ts` | Returns the manual setup checklist text for a provider. | legacy | `tests/e2e/cli.test.ts` |
 | `import-credentials.ts` | Validates a local JSON file and writes credential files. | legacy | `tests/e2e/cli.test.ts` |
 | `install-skill.ts` | Copies the bundled agent skill into `.claude/skills/oauth-compass/`. | untracked | `tests/integration/install-skill.test.ts`, `tests/e2e/packed-install.test.ts` |
+| `init.ts` | Runs the interactive setup wizard: checklist, import, then doctor. | untracked | `tests/unit/init.test.ts`, `tests/e2e/init.test.ts` |
 
 ## Relations
 

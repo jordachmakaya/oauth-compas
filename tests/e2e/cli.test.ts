@@ -23,7 +23,7 @@ const cli = resolve("dist/src/cli.js");
 function run(...args: string[]) {
   return spawnSync(process.execPath, [cli, ...args], {encoding:"utf8", timeout:10000});
 }
-for (const provider of ["google", "github", "linkedin"] as const) {
+for (const provider of ["google", "github", "linkedin", "cognito"] as const) {
   test(`E2E ${provider}: guide/import/doctor + redact CLI output`, async () => {
     const root = await mkdtemp(join(tmpdir(), `oauth-e2e-${provider}-`));
     try {
@@ -32,7 +32,8 @@ for (const provider of ["google", "github", "linkedin"] as const) {
       assert.equal(guide.status, 0, guide.stderr); assert.match(guide.stdout, new RegExp(provider, "i"));
       const input = provider === "google"
         ? {web:{client_id:"test-id",client_secret:"E2E_SECRET_DO_NOT_PRINT",redirect_uris:[redirect]}}
-        : {client_id:"test-id",client_secret:"E2E_SECRET_DO_NOT_PRINT",redirect_uris:[redirect]};
+        : {client_id:"test-id",client_secret:"E2E_SECRET_DO_NOT_PRINT",redirect_uris:[redirect],
+          ...(provider === "cognito" ? {issuer:"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_EXAMPLE"} : {})};
       const path = join(root,"input.json");
       await writeFile(path, JSON.stringify(input));
       const imported = run("import",provider,"--file",path,"--redirect",redirect,"--out",root);

@@ -4,7 +4,7 @@
  * title: Credential file storage
  * description: Builds output paths and .env content, writes credential files without overwriting, and updates .gitignore.
  * job_ref: legacy
- * functions: [outputPaths, envContent, saveCredentials, checkGitignore, ensureGitignore, ensureDirectory, writeSecretFile]
+ * functions: [outputPaths, envKeys, envValue, envContent, saveCredentials, checkGitignore, ensureGitignore, ensureDirectory, writeSecretFile]
  * classes: []
  * inputs: [root, OAuthCredentials]
  * outputs: [OutputPaths, .oauth-init files, .gitignore entry]
@@ -25,18 +25,26 @@ import { join, resolve } from "node:path";
 import type { OAuthCredentials } from "./types.js";
 import { UserError } from "./errors.js";
 
-const providerKeys = { google: "GOOGLE", github: "GITHUB", linkedin: "LINKEDIN" } as const;
 export type OutputPaths = Readonly<{ json: string; env: string }>;
 export function outputPaths(root: string, provider: OAuthCredentials["provider"]): OutputPaths {
   const directory = join(resolve(root), ".oauth-init");
   return { json: join(directory, `${provider}.credentials.json`), env: join(directory, `${provider}.env`) };
 }
+export function envKeys(provider: OAuthCredentials["provider"]): readonly string[] {
+  const prefix = provider.toUpperCase();
+  return [`${prefix}_CLIENT_ID`, `${prefix}_CLIENT_SECRET`, `${prefix}_REDIRECT_URI`];
+}
+// Double quotes keep $ and backticks active when a file is sourced, so such values use single quotes.
+function envValue(value: string): string {
+  if (!/[$`\\"]/.test(value)) return `"${value}"`;
+  if (value.includes("'")) throw new UserError("A credential contains characters that cannot be written safely to a .env file");
+  return `'${value}'`;
+}
 export function envContent(credentials: OAuthCredentials): string {
-  const key = providerKeys[credentials.provider];
-  const q = (value: string): string => JSON.stringify(value);
-  return [`${key}_CLIENT_ID=${q(credentials.clientId)}`,
-    `${key}_CLIENT_SECRET=${q(credentials.clientSecret)}`,
-    `${key}_REDIRECT_URI=${q(credentials.redirectUri)}`, ""].join("\n");
+  const values = [credentials.clientId, credentials.clientSecret, credentials.redirectUri];
+  const prefix = credentials.provider.toUpperCase();
+  return [...envKeys(credentials.provider).map((key, index) => `${key}=${envValue(values[index] ?? "")}`),
+    ...Object.entries(credentials.extras).map(([key, value]) => `${prefix}_${key}=${envValue(value)}`), ""].join("\n");
 }
 async function ensureDirectory(directory: string): Promise<void> {
   try {
@@ -61,21 +69,30 @@ export async function saveCredentials(root: string, data: OAuthCredentials): Pro
     try { await access(path, constants.F_OK); throw new UserError(`Refusing to overwrite ${path}`); }
     catch (error: unknown) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
   }
+  const extras = Object.fromEntries(Object.entries(data.extras).map(([key, value]) => [key.toLowerCase(), value]));
   const serialized = JSON.stringify({ provider: data.provider, client_id: data.clientId,
-    client_secret: data.clientSecret, redirect_uris: data.redirectUris }, null, 2) + "\n";
+    client_secret: data.clientSecret, redirect_uris: data.redirectUris, ...extras }, null, 2) + "\n";
+  const env = envContent(data);
   await writeSecretFile(paths.json, serialized);
   try {
-    await writeSecretFile(paths.env, envContent(data));
+    await writeSecretFile(paths.env, env);
   } catch (error: unknown) {
     await rm(paths.json, { force: true });
     throw error;
   }
   return paths;
 }
+const ignoreEntries = new Set([".oauth-init/", ".oauth-init", "/.oauth-init/", "/.oauth-init", ".oauth-init/*"]);
 export async function checkGitignore(root: string): Promise<boolean> {
   try {
     const contents = await readFile(join(root, ".gitignore"), "utf8");
-    return contents.split(/\r?\n/).some((line) => line.trim() === ".oauth-init/");
+    let ignored = false;
+    for (const line of contents.split(/\r?\n/)) {
+      const entry = line.trim();
+      if (ignoreEntries.has(entry)) ignored = true;
+      else if (entry.startsWith("!") && ignoreEntries.has(entry.slice(1))) ignored = false;
+    }
+    return ignored;
   } catch { return false; }
 }
 export async function ensureGitignore(root: string): Promise<void> {

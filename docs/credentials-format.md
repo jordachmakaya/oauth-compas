@@ -1,6 +1,6 @@
 # Credential input formats
 
-For step-by-step instructions, see the [Google](google.md), [GitHub](github.md) and [LinkedIn](linkedin.md) guides.
+For step-by-step instructions, see the [Google](google.md), [GitHub](github.md), [LinkedIn](linkedin.md) and [Amazon Cognito](cognito.md) guides.
 
 Secrets must be obtained from each provider's official developer console. No browser automation, scraping, or third-party API impersonation.
 
@@ -22,10 +22,22 @@ These consoles display credentials rather than supplying the same Google JSON fo
 
 Use a LinkedIn callback path instead for LinkedIn. This input is never transmitted by the CLI.
 
+## Amazon Cognito
+
+Same file, plus the user pool's `issuer`:
+
+```json
+{"client_id":"PLACEHOLDER_ID","client_secret":"PLACEHOLDER_SECRET","issuer":"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_EXAMPLE","redirect_uris":["http://localhost:3000/api/auth/callback/cognito"]}
+```
+
+The issuer is also written to the outputs, as `COGNITO_ISSUER` in the `.env`.
+
+## Outputs
+
 Outputs in `.oauth-init/`:
 
 - `<provider>.credentials.json` — normalized provider-specific JSON **containing the secret**.
-- `<provider>.env` — app-friendly env variables **containing the secret**.
+- `<provider>.env` — app-friendly env variables **containing the secret**. Values are double-quoted, or single-quoted if they contain `$`, a backtick, a backslash or `"`, so that sourcing the file cannot expand them. A value that cannot be quoted safely is refused.
 
 Redirect URIs are stored exactly as written, because providers compare them exactly. The `.env` uses the URI passed to `--redirect`, or the first URI in the file.
 

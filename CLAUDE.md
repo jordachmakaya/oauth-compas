@@ -28,7 +28,7 @@ pnpm run pack:check
 ## Audit checklist
 
 - CLI: help, unknown commands, missing required flags, invalid providers, path errors, exit codes.
-- Providers: Google `web` JSON shape; GitHub OAuth App vs GitHub App clarity; LinkedIn OIDC product access and required scopes.
+- Providers: Google `web` JSON shape; GitHub OAuth App vs GitHub App clarity; LinkedIn OIDC product access and required scopes; Cognito issuer and confidential app client.
 - Validation: `unknown` JSON, empty/oversized fields, malicious URLs, redirect mismatch, HTTP allowed only on loopback, no open redirects.
 - Storage: secrets not in output or exceptions; output path symlinks, directory permissions, atomicity, existing files, Windows ACL caveat, `.gitignore` behavior.
 - Quality: strict typecheck, hermetic tests, windows/macos/linux CI, npm package `bin`, package content, SBOM/dependency audit if available.

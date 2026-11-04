@@ -2,6 +2,8 @@
 
 This guide takes you from nothing to working Google OAuth credentials in your project. It takes about 15 minutes. You create the client yourself in Google's console; OAuth Compass checks and stores the result.
 
+**In a hurry?** Run `npx oauth-compass` and answer the questions. This guide explains the same steps in detail.
+
 ## Before you start
 
 **You need:**
@@ -74,7 +76,7 @@ This command works in PowerShell and in macOS and Linux terminals. In the older 
 npx oauth-compass doctor google
 ```
 
-You should see three lines starting with `PASS`. On Windows, `doctor` does not check file permissions.
+You should see three lines starting with `PASS`. On Windows, a fourth `INFO` line reminds you that file permissions are not checked.
 
 ## Step 6: Finish up
 
@@ -97,6 +99,7 @@ Never put the secret in browser code or commit it. OAuth Compass does not add a 
 | `Expected Google OAuth Web client JSON` | The file is not a Web application client | Create a client of type **Web application**. |
 | `redirect_uris must contain 1-20 redirect URLs` | The JSON has no redirect URI | Create the client with a redirect URI, then download the JSON. |
 | `Expected redirect URI is not present` | `--redirect` differs from the file, even by a final `/` | Make both exactly identical. |
+| `Google does not allow raw IP addresses` | The redirect URL uses an IP address | Use a domain name, or `localhost` for local work. |
 | `Refusing to overwrite` | Credentials already exist | Delete the two `google.*` files in `.oauth-init/` if you want to replace them, then import again. |
 | `redirect_uri_mismatch` in the browser | Your app sent a different address from the console | Match scheme, case and final `/` exactly, then allow time for the change. |
 | `FAIL` in `doctor` | That check failed | Read the line: it names the file or `.gitignore` problem. |

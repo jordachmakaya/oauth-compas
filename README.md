@@ -8,9 +8,13 @@
 ![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-**A local-first OAuth credential setup assistant** for Google, GitHub and LinkedIn. It gives you a setup checklist, then turns the credentials you obtained into clean JSON and `.env` files.
+**A local-first OAuth credential setup assistant** for Google, GitHub, LinkedIn and Amazon Cognito. It gives you a setup checklist, then turns the credentials you obtained into clean JSON and `.env` files.
 
 **No remote app creation, no telemetry, no credentials uploaded.** You still create the OAuth app yourself in the provider's official console.
+
+<p align="center">
+  <img src=".github/assets/demo.gif" alt="Interactive setup: choose a provider, confirm your URLs, then import and check a credentials file" width="820">
+</p>
 
 > Status: `v0.1.0` candidate, **not yet published to npm**. The `npx` commands below will work after the first release. To try it today, see [Development](#development).
 
@@ -18,6 +22,7 @@
 
 **OAuth Compass does:**
 
+- Walk you through setup with a single interactive command.
 - Print a setup checklist for each provider, with your own URLs.
 - Validate the credentials file you provide: format, HTTPS rules and redirect URL match.
 - Write a JSON file and a `.env` file to `.oauth-init/`, with owner-only permissions on macOS and Linux.
@@ -36,27 +41,44 @@
 - Delete your input file. That's up to you.
 - Run anything at install time. There is no `postinstall` script.
 
-## Supported providers
+## Compatibility
 
-| Provider | App type | Created in | You provide | Suggested scopes |
-| --- | --- | --- | --- | --- |
-| Google | Web OAuth client | Google Auth Platform (manual) | Downloaded `web` JSON | `openid email profile` |
-| GitHub | OAuth App | Developer settings (manual) | Small local JSON file | `read:user user:email` (as needed) |
-| LinkedIn | Sign In with LinkedIn using OIDC | Developer Portal (manual) | Small local JSON file | `openid profile email` |
+### Providers
 
-GitHub Apps can be more appropriate than OAuth Apps for repository integrations.
+| Provider | App type | Created in | You provide | Suggested scopes | Guide |
+| --- | --- | --- | --- | --- | --- |
+| Google | Web OAuth client | Google Auth Platform (manual) | Downloaded `web` JSON | `openid email profile` | [Google guide](docs/google.md) |
+| GitHub | OAuth App | Developer settings (manual) | Small local JSON file | `read:user user:email` (as needed) | [GitHub guide](docs/github.md) |
+| LinkedIn | Sign In with LinkedIn using OIDC | Developer Portal (manual) | Small local JSON file | `openid profile email` | [LinkedIn guide](docs/linkedin.md) |
+| Amazon Cognito | User pool app client | AWS console (manual) | Small local JSON file with an issuer | `openid email profile` | [Cognito guide](docs/cognito.md) |
 
-## Provider guides
+GitHub Apps can be more appropriate than OAuth Apps for repository integrations. On AWS, Cognito is a user directory that you own: there is no "Sign in with AWS" for your users.
 
-New to OAuth? Follow the beginner guide for your provider. Each one lists what you need beforehand and walks through every step.
+Each guide is written for beginners and lists what you need beforehand. You need no `gh`, `gcloud` or `aws` command-line tool.
 
-- [Google](docs/google.md)
-- [GitHub](docs/github.md)
-- [LinkedIn](docs/linkedin.md)
+### Operating systems
+
+| OS | Support | Tested in CI on | Note |
+| --- | --- | --- | --- |
+| Linux | Yes | Ubuntu 24.04 | Credential files are owner-only (0600) |
+| macOS | Yes | macOS 15 | Credential files are owner-only (0600) |
+| Windows | Yes | Windows Server 2025 | Owner-only permissions are not applied; review NTFS ACLs separately |
+
+Node.js 22 and 24 are tested on all three.
 
 ## Quick start
 
-You only need Node.js 22+ and a provider account: no `gh`, `gcloud` or other tool to set up. The examples use GitHub; replace `github` with `google` or `linkedin` for the others.
+You only need Node.js 22+ and a provider account. In your project's main folder, run:
+
+```bash
+npx oauth-compass
+```
+
+The assistant asks for your provider and URLs, shows the setup checklist, then imports and checks your credentials file. It never asks for your secret. If your app isn't ready yet, leave the file path empty and come back later.
+
+## Step by step
+
+Prefer separate commands, for example in a script? These steps do the same thing. The examples use GitHub; replace `github` with another provider ID.
 
 ### Step 1: Check the CLI runs
 
@@ -109,13 +131,13 @@ Note: the CLI cannot create third-party OAuth apps or disclose client secrets au
 This step is manual. Follow the checklist in the provider's console.
 
 - **Google:** download the client JSON right after creating the client. Google shows the full secret only at creation.
-- **GitHub and LinkedIn:** copy the values into a local file in your home folder, for example `github-oauth.json`. Never commit this file.
+- **GitHub, LinkedIn and Cognito:** copy the values into a local file in your home folder, for example `github-oauth.json`. Never commit this file.
 
 ```json
 {"client_id":"PLACEHOLDER_ID","client_secret":"PLACEHOLDER_SECRET","redirect_uris":["http://localhost:3000/api/auth/callback/github"]}
 ```
 
-Details are in the [provider guides](#provider-guides) and [credential formats](docs/credentials-format.md).
+Details are in the [provider guides](#providers) and [credential formats](docs/credentials-format.md).
 
 ### Step 4: Import the credentials
 
@@ -150,7 +172,7 @@ PASS /your/project/.oauth-init/github.credentials.json exists
 PASS /your/project/.oauth-init/github.env exists
 ```
 
-On Windows, `doctor` does not verify file permissions. Check NTFS ACLs separately.
+`doctor` checks local files only, so it cannot prove that the provider accepts your credentials. On Windows, an extra `INFO` line reminds you that file permissions are not checked.
 
 ### Step 6: Use the values in your app
 
@@ -168,6 +190,8 @@ Use these only on your application's **trusted server**, never in client-side co
 
 | Command | What it does | Expected result | Exit code |
 | --- | --- | --- | --- |
+| `oauth-compass` | Starts the interactive setup in a terminal, and prints help otherwise | Questions, then checklist, import and checks | `0` when complete or stopped, `1` on failure |
+| `oauth-compass init` | Starts the interactive setup | Same as above | Same as above |
 | `oauth-compass providers` | Lists supported providers | One provider per line | `0` |
 | `oauth-compass guide <provider> --origin URL --redirect URL` | Prints the manual setup checklist | Console link, URLs, scopes and numbered steps | `0` |
 | `oauth-compass import <provider> --file PATH [--redirect URL] [--out DIRECTORY]` | Validates a local JSON file and writes the credential files | Paths of the two created files | `0` |
@@ -175,18 +199,24 @@ Use these only on your application's **trusted server**, never in client-side co
 | `oauth-compass skill install [--out DIRECTORY]` | Installs the AI agent skill | Path of the created `SKILL.md` | `0` |
 | `oauth-compass --help` | Shows usage | Command list | `0` |
 
-`<provider>` is `google`, `github` or `linkedin`.
+`<provider>` is `google`, `github`, `linkedin` or `cognito`.
 
 Good to know:
 
 - `--out` sets the folder that receives `.oauth-init/`. It defaults to the current folder.
 - `--redirect` on `import` must match a URI in your file exactly. The `.env` uses that URI, or the first one in the file if you omit it.
 - Any error prints `Error: ...` on stderr and exits with `1`. For example, a second import prints `Error: Refusing to overwrite ...`.
+- Unknown options, repeated options and extra arguments are rejected, so a typo can't send your secrets to the wrong folder.
+- Unsafe redirect URLs are refused: fragments, wildcards, path traversal, embedded credentials, or another URL in the query. Google also refuses raw IP addresses.
 - Never pass secrets as command-line arguments.
+
+<p align="center">
+  <img src=".github/assets/checks.gif" alt="doctor passes, a mistyped option is rejected, and an existing credential is not overwritten" width="820">
+</p>
 
 ## Using an AI coding agent
 
-OAuth Compass includes a skill that teaches agents such as Claude Code to run this workflow safely: the agent runs local commands, never asks for your secret, and leaves the console steps to you. It follows the [Agent Skills](https://agentskills.io) format.
+OAuth Compass includes a skill that teaches agents such as Claude Code to run the step-by-step workflow safely: the agent runs local commands, never asks for your secret, and leaves the console steps to you. It follows the [Agent Skills](https://agentskills.io) format.
 
 The skill ships inside the package, but nothing is written until you ask. Run this from your project's root folder:
 
@@ -200,6 +230,10 @@ Expected result:
 Agent skill installed:
   /your/project/.claude/skills/oauth-compass/SKILL.md
 ```
+
+<p align="center">
+  <img src=".github/assets/agent-skill.gif" alt="skill install creates SKILL.md, whose rules forbid agents from handling secrets" width="820">
+</p>
 
 Commit that file to share the skill with your team. To make it available in all your projects, add `--out "$HOME"`. Existing skill files are never overwritten. Other agents may read skills from a different folder: copy `SKILL.md` there.
 
@@ -218,6 +252,8 @@ node dist/src/cli.js --help
 ```
 
 This repository uses pnpm only and is reproducible: Node.js is pinned in `.nvmrc` and `devEngines`, pnpm in `packageManager` (`corepack enable pnpm` activates it), direct dependencies in the `pnpm-workspace.yaml` catalog, and every transitive package in `pnpm-lock.yaml`.
+
+The README demos are recorded from the packed tarball with [VHS](https://github.com/charmbracelet/vhs). To refresh one, run its `.tape` file from `.github/assets/`.
 
 ### Testing
 
