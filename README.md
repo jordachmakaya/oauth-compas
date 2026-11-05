@@ -108,6 +108,7 @@ Expected result:
 google
 github
 linkedin
+cognito
 ```
 
 Using pnpm? Replace `npx` with `pnpm dlx`. For regular use, run `npm install -g @hardmachinelabs/oauth-compass` once, then use the shorter `oauth-compass` command.
@@ -287,6 +288,10 @@ pnpm run pack:check
 These scripts run through [Turborepo](https://turborepo.com). Build and typecheck results are cached; tests and coverage are never cached, so a pass always means the tests ran. `pnpm run coverage` enforces the thresholds in `.c8rc.json` and writes `coverage/lcov.info` and an HTML report. Turborepo collects anonymous telemetry by default: run `pnpm exec turbo telemetry disable` to opt out locally (CI already disables it). The published CLI itself has no telemetry and zero runtime dependencies.
 
 E2E tests run the compiled CLI for every provider and assert that synthetic secrets are not printed. A separate test installs the packed tarball like a consumer and runs the `oauth-compass` binary. No external accounts, browsers or provider secrets are required. CI covers Node 22 and 24 on Ubuntu, macOS and Windows.
+
+### Provider monitoring
+
+The CLI never contacts a provider, so a provider change cannot crash it, but it can make our instructions wrong. `.github/workflows/provider-check.yml` runs monthly and opens one GitHub issue if a documented link is gone, Google or LinkedIn OIDC metadata changed, or a key phrase left the official docs. Pages that block automated requests are listed but do not open an issue. It cannot see provider consoles, so a second schedule opens a manual review checklist every 6 months. See [provider monitoring](docs/provider-monitoring.md).
 
 ### Releasing
 

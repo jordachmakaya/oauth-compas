@@ -21,7 +21,8 @@
     "task:build": {
       "inputs": [
         "src/**/*.ts",
-        "tests/**/*.ts"
+        "tests/**/*.ts",
+        "scripts/**/*.ts"
       ],
       "outputs": [
         "dist/**"
@@ -30,7 +31,8 @@
     "task:typecheck": {
       "inputs": [
         "src/**/*.ts",
-        "tests/**/*.ts"
+        "tests/**/*.ts",
+        "scripts/**/*.ts"
       ],
       "outputs": []
     },

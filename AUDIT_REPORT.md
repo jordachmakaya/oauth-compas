@@ -87,7 +87,7 @@ Also added at the owner's request: Amazon Cognito (fourth provider), the interac
 | Real tarball install and behaviour (F-01, F-07, symlinks) | Docker and WSL, Node 22.23.4 and 24.x | F-01 and F-07 reproduced; symlink refusals pass |
 | Real tarball install | Windows via npm and pnpm | Works |
 | Fixed tarball: `npm i -g`, local `.bin`, `npx`, `pnpm exec`, `pnpm dlx`, `pnpm add -g` | Docker, Node 22.23.4 and 24.16.0 | Works |
-| All gates on the final code (59 tests) | Windows; Docker Node 22.23.4 and 24.16.0 | Pass; 1 symlink test is skipped on Windows |
+| All gates on the final code (70 tests) | Windows; Docker Node 22.23.4 and 24.16.0 | Pass; 1 symlink test is skipped on Windows |
 | Provider guides: every command run verbatim against the tarball | Docker, Node 22.23.4 and 24.16.0 | Pass |
 
 Symlink cases gave these results on Linux: live and dangling output links, symlinked `.oauth-init` and symlinked `.gitignore` were all refused with no write through the link. A dangling link gives only "Unexpected error". Non-root write refusal also held. Windows symlink cases could not run (`EPERM`). Tarballs used for F-01 predate the `@filemeta` headers and Turborepo, neither of which touches the guard logic.

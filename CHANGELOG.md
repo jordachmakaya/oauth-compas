@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Monthly provider check that opens a GitHub issue when provider documentation or OIDC metadata no longer matches ours, plus a manual review reminder every 6 months.
+
+### Fixed
+
+- The README now lists `cognito` in the expected output of `providers`.
+
 ## [0.1.0] - 2026-11-04
 
 First public version. Real sign-ins on live provider consoles are not confirmed yet.
